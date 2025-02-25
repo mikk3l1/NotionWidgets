@@ -5,6 +5,8 @@ body {
     height: 100vh;
     background-color: #f4f4f4;
     font-family: Arial, sans-serif;
+    margin: 0;
+    transition: background-color 0.3s;
 }
 
 .pomodoro-timer {
@@ -13,6 +15,9 @@ body {
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 90%;
+    max-width: 400px;
+    transition: background-color 0.3s, color 0.3s;
 }
 
 #timer {
@@ -27,6 +32,8 @@ button {
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    width: 100%;
+    max-width: 150px;
 }
 
 #start {
@@ -39,7 +46,129 @@ button {
     color: white;
 }
 
+.sound-button {
+    width: 100%;
+    max-width: 150px;
+}
+
 .sound-button.active {
     background-color: #2196F3;
     color: white;
+}
+
+@media (min-width: 600px) {
+    .pomodoro-timer {
+        width: 80%;
+    }
+
+    button {
+        width: auto;
+    }
+
+    .sound-button {
+        width: auto;
+    }
+}
+
+body.dark-mode {
+    background-color: #121212;
+}
+
+.pomodoro-timer.dark-mode {
+    background-color: #1e1e1e;
+    color: #ffffff;
+}
+
+button.dark-mode {
+    background-color: #333333;
+    color: #ffffff;
+}
+
+#start.dark-mode {
+    background-color: #4CAF50;
+}
+
+#reset.dark-mode {
+    background-color: #f44336;
+}
+
+.sound-button.dark-mode.active {
+    background-color: #2196F3;
+}
+
+.dark-mode-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.toggle-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+    width: 80px;
+    height: 40px;
+}
+
+.toggle-label input {
+    display: none;
+}
+
+.toggle-slider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    border-radius: 34px;
+    transition: 0.4s;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 32px;
+    width: 32px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    border-radius: 50%;
+    transition: 0.4s;
+}
+
+input:checked + .toggle-label .toggle-slider {
+    background-color: #2196F3;
+}
+
+input:checked + .toggle-label .toggle-slider:before {
+    transform: translateX(40px);
+}
+
+.toggle-moon,
+.toggle-sun {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+    transition: 0.4s;
+}
+
+.toggle-moon {
+    right: 10px;
+    display: none;
+}
+
+.toggle-sun {
+    left: 10px;
+}
+
+input:checked + .toggle-label .toggle-moon {
+    display: block;
+}
+
+input:checked + .toggle-label .toggle-sun {
+    display: none;
 }

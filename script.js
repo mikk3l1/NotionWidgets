@@ -18,6 +18,7 @@ const rainSoundButton = document.getElementById('rain-sound');
 const jungleSoundButton = document.getElementById('jungle-sound');
 const oceanSoundButton = document.getElementById('ocean-sound');
 const soundButtons = document.querySelectorAll('.sound-button');
+const darkModeToggle = document.getElementById('dark-mode-toggle');
 
 function updateTimer() {
     const minutes = Math.floor(timeLeft / 60);
@@ -99,11 +100,18 @@ function changeSound(videoId, button) {
     button.classList.add('active');
 }
 
+function toggleDarkMode() {
+    document.body.classList.toggle('dark-mode');
+    document.querySelector('.pomodoro-timer').classList.toggle('dark-mode');
+    document.querySelectorAll('button').forEach(button => button.classList.toggle('dark-mode'));
+}
+
 rainSoundButton.addEventListener('click', () => changeSound('yIQd2Ya0Ziw', rainSoundButton)); // Replace with actual rain sound ID
 jungleSoundButton.addEventListener('click', () => changeSound('nZUMdnky11E', jungleSoundButton)); // Replace with actual jungle sound ID
 oceanSoundButton.addEventListener('click', () => changeSound('bn9F19Hi1Lk', oceanSoundButton)); // Replace with actual ocean sound ID
 
 startButton.addEventListener('click', startTimer);
 resetButton.addEventListener('click', resetTimer);
+darkModeToggle.addEventListener('change', toggleDarkMode);
 
 updateTimer();
