@@ -7,24 +7,28 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body class="dark-mode">
-    <div class="pomodoro-timer dark-mode">
+    <main class="pomodoro-timer dark-mode">
         <h1>Pomodoro Timer</h1>
-        <div id="timer">25:00</div>
-        <div>
-            <label for="work-time">Work Time (minutes):</label>
-            <input type="number" step="0.1" id="work-time" value="25">
+        <div id="timer" aria-live="polite">25:00</div>
+        <form>
+            <div>
+                <label for="work-time">Work Time (minutes):</label>
+                <input type="number" step="0.1" id="work-time" value="25" aria-label="Work Time">
+            </div>
+            <div>
+                <label for="break-time">Break Time (minutes):</label>
+                <input type="number" step="0.1" id="break-time" value="5" aria-label="Break Time">
+            </div>
+        </form>
+        <div class="sound-buttons">
+            <button id="rain-sound" class="sound-button" aria-label="Rain Sound">🌧️ Rain</button>
+            <button id="jungle-sound" class="sound-button" aria-label="Jungle Sound">🌳 Jungle</button>
+            <button id="ocean-sound" class="sound-button" aria-label="Ocean Sound">🌊 Ocean</button>
         </div>
-        <div>
-            <label for="break-time">Break Time (minutes):</label>
-            <input type="number" step="0.1" id="break-time" value="5">
+        <div class="control-buttons">
+            <button id="start" aria-label="Start Timer">Start</button>
+            <button id="reset" aria-label="Reset Timer">Reset</button>
         </div>
-        <div>
-            <button id="rain-sound" class="sound-button">Rain</button>
-            <button id="jungle-sound" class="sound-button">Jungle</button>
-            <button id="ocean-sound" class="sound-button">Ocean</button>
-        </div>
-        <button id="start">Start</button>
-        <button id="reset">Reset</button>
         <div class="dark-mode-toggle">
             <input type="checkbox" id="dark-mode-toggle" checked style="display:none;">
             <label for="dark-mode-toggle" class="toggle-label">
@@ -33,8 +37,7 @@
                 <span class="toggle-sun">🌛</span>
             </label>
         </div>
-    </div>
-    <div id="player" style="display:none;"></div>
+    </main>
     <audio id="end-sound" src="sounds/countdown/end-sound.mp3"></audio>
     <audio id="rain-sound-file" src="sounds/background/rain.mp3" loop></audio>
     <audio id="jungle-sound-file" src="sounds/background/jungle.mp3" loop></audio>
