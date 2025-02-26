@@ -106,6 +106,12 @@ function toggleDarkMode() {
     document.querySelectorAll('button').forEach(button => button.classList.toggle('dark-mode'));
 }
 
+document.addEventListener('DOMContentLoaded', () => {
+    document.body.classList.add('dark-mode');
+    document.querySelector('.pomodoro-timer').classList.add('dark-mode');
+    document.querySelectorAll('button').forEach(button => button.classList.add('dark-mode'));
+});
+
 rainSoundButton.addEventListener('click', () => changeSound('yIQd2Ya0Ziw', rainSoundButton)); // Replace with actual rain sound ID
 jungleSoundButton.addEventListener('click', () => changeSound('nZUMdnky11E', jungleSoundButton)); // Replace with actual jungle sound ID
 oceanSoundButton.addEventListener('click', () => changeSound('bn9F19Hi1Lk', oceanSoundButton)); // Replace with actual ocean sound ID
