@@ -4,9 +4,7 @@ let isBreak = false;
 let workTime = 25 * 60;
 let breakTime = 5 * 60;
 let timeLeft = workTime;
-let player;
-let playerReady = false;
-let selectedSound = 'yIQd2Ya0Ziw'; // Default sound (rain)
+let selectedSound = 'rain'; // Default sound (rain)
 
 const timerElement = document.getElementById('timer');
 const startButton = document.getElementById('start');
@@ -19,6 +17,15 @@ const jungleSoundButton = document.getElementById('jungle-sound');
 const oceanSoundButton = document.getElementById('ocean-sound');
 const soundButtons = document.querySelectorAll('.sound-button');
 const darkModeToggle = document.getElementById('dark-mode-toggle');
+const rainSoundFile = document.getElementById('rain-sound-file');
+const jungleSoundFile = document.getElementById('jungle-sound-file');
+const oceanSoundFile = document.getElementById('ocean-sound-file');
+
+const sounds = {
+    rain: rainSoundFile,
+    jungle: jungleSoundFile,
+    ocean: oceanSoundFile
+};
 
 function updateTimer() {
     const minutes = Math.floor(timeLeft / 60);
@@ -27,14 +34,14 @@ function updateTimer() {
 }
 
 function startTimer() {
-    if (!isRunning && playerReady) {
+    if (!isRunning) {
         workTime = parseFloat(workTimeInput.value) * 60;
         breakTime = parseFloat(breakTimeInput.value) * 60;
         if (!isBreak) {
             timeLeft = workTime;
         }
         isRunning = true;
-        player.playVideo();
+        playSound();
         timer = setInterval(() => {
             if (timeLeft > 0) {
                 if (timeLeft === 4) {
@@ -45,7 +52,7 @@ function startTimer() {
             } else {
                 clearInterval(timer);
                 isRunning = false;
-                player.stopVideo();
+                stopSound();
                 if (isBreak) {
                     isBreak = false;
                     timeLeft = workTime;
@@ -66,38 +73,34 @@ function resetTimer() {
     workTime = parseFloat(workTimeInput.value) * 60;
     breakTime = parseFloat(breakTimeInput.value) * 60;
     timeLeft = workTime;
-    player.stopVideo();
+    stopSound();
     updateTimer();
 }
 
-function onYouTubeIframeAPIReady() {
-    player = new YT.Player('player', {
-        height: '0',
-        width: '0',
-        videoId: selectedSound,
-        events: {
-            'onReady': onPlayerReady
-        }
-    });
-}
-
-function onPlayerReady(event) {
-    playerReady = true;
-    event.target.setVolume(50);
-}
-
-function changeSound(videoId, button) {
-    selectedSound = videoId;
-    if (playerReady) {
-        player.loadVideoById(videoId);
-        if (isRunning) {
-            player.playVideo();
-        } else {
-            player.stopVideo();
-        }
+function changeSound(sound, button) {
+    stopSound();
+    selectedSound = sound;
+    if (isRunning) {
+        playSound();
     }
     soundButtons.forEach(btn => btn.classList.remove('active'));
     button.classList.add('active');
+}
+
+function playSound() {
+    if (sounds[selectedSound]) {
+        sounds[selectedSound].currentTime = 0;
+        sounds[selectedSound].play();
+    }
+}
+
+function stopSound() {
+    Object.values(sounds).forEach(sound => {
+        if (sound) {
+            sound.pause();
+            sound.currentTime = 0;
+        }
+    });
 }
 
 function toggleDarkMode() {
@@ -110,11 +113,12 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.classList.add('dark-mode');
     document.querySelector('.pomodoro-timer').classList.add('dark-mode');
     document.querySelectorAll('button').forEach(button => button.classList.add('dark-mode'));
+    rainSoundButton.classList.add('active'); // Set rain sound button as active from the start
 });
 
-rainSoundButton.addEventListener('click', () => changeSound('yIQd2Ya0Ziw', rainSoundButton)); // Replace with actual rain sound ID
-jungleSoundButton.addEventListener('click', () => changeSound('nZUMdnky11E', jungleSoundButton)); // Replace with actual jungle sound ID
-oceanSoundButton.addEventListener('click', () => changeSound('bn9F19Hi1Lk', oceanSoundButton)); // Replace with actual ocean sound ID
+rainSoundButton.addEventListener('click', () => changeSound('rain', rainSoundButton));
+jungleSoundButton.addEventListener('click', () => changeSound('jungle', jungleSoundButton));
+oceanSoundButton.addEventListener('click', () => changeSound('ocean', oceanSoundButton));
 
 startButton.addEventListener('click', startTimer);
 resetButton.addEventListener('click', resetTimer);
