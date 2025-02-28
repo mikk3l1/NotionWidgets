@@ -19,6 +19,7 @@ body {
     max-width: 400px;
     transition: background-color 0.3s, color 0.3s;
     position: relative;
+    z-index: 1;
 }
 
 h1 {
@@ -322,5 +323,191 @@ input[type="number"] {
     
     label {
         margin-bottom: 0;
+    }
+}
+
+/* Common styles for all effect containers */
+.rain-container,
+.jungle-container,
+.ocean-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 2s ease;
+    overflow: hidden;
+}
+
+.rain-container.active,
+.jungle-container.active,
+.ocean-container.active {
+    opacity: 1;
+}
+
+/* Rain Effect Styles */
+.raindrop {
+    position: absolute;
+    width: 2px;
+    height: 15px;
+    background: linear-gradient(transparent, #4e9ad8);
+    border-radius: 5px;
+    opacity: 0;
+    animation: fall linear infinite;
+    animation-fill-mode: forwards;
+}
+
+.dark-mode .raindrop {
+    background: linear-gradient(transparent, #5eb1ff);
+}
+
+.light-mode .raindrop {
+    background: linear-gradient(transparent, #4e9ad8);
+}
+
+@keyframes fall {
+    0% {
+        transform: translateY(-120vh);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.6;
+    }
+    100% {
+        transform: translateY(120vh);
+        opacity: 0.6;
+    }
+}
+
+/* Jungle Effect Styles */
+.leaf {
+    position: absolute;
+    width: 25px;
+    height: 25px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0;
+    transform: translateY(-120vh); /* Start above viewport */
+    animation: leafFall linear infinite;
+    animation-fill-mode: forwards;
+    will-change: transform, opacity; /* Performance optimization */
+}
+
+.leaf.leaf1 {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2368a063"><path d="M17,8C8,10 5.9,16.17 3.82,21.34L5.71,22L6.66,19.7C7.14,19.87 7.64,20 8,20C19,20 22,3 22,3C21,5 14,5.25 9,6.25C4,7.25 2,11.5 2,13.5C2,15.5 3.75,17.25 3.75,17.25C7,8 17,8 17,8Z"/></svg>');
+}
+
+.leaf.leaf2 {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%234caf50"><path d="M17,8C8,10 5.9,16.17 3.82,21.34L5.71,22L6.66,19.7C7.14,19.87 7.64,20 8,20C19,20 22,3 22,3C21,5 14,5.25 9,6.25C4,7.25 2,11.5 2,13.5C2,15.5 3.75,17.25 3.75,17.25C7,8 17,8 17,8Z" transform="rotate(120 12 12)"/></svg>');
+}
+
+.leaf.leaf3 {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2381c784"><path d="M17,8C8,10 5.9,16.17 3.82,21.34L5.71,22L6.66,19.7C7.14,19.87 7.64,20 8,20C19,20 22,3 22,3C21,5 14,5.25 9,6.25C4,7.25 2,11.5 2,13.5C2,15.5 3.75,17.25 3.75,17.25C7,8 17,8 17,8Z" transform="rotate(240 12 12)"/></svg>');
+}
+
+.dark-mode .leaf {
+    filter: brightness(1.2);
+}
+
+.light-mode .leaf {
+    filter: brightness(0.95);
+}
+
+@keyframes leafFall {
+    0% {
+        transform: translateY(-120vh) rotate(0deg);
+        opacity: 0;
+    }
+    2% { /* Even faster fade in */
+        opacity: 0.8;
+    }
+    100% {
+        transform: translateY(120vh) rotate(360deg);
+        opacity: 0.8;
+    }
+}
+
+/* Ocean Effect Styles */
+.wave {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 200%;
+    height: 100px;
+    background: linear-gradient(transparent, rgba(64, 164, 223, 0.2));
+    border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+    animation: waveMove ease-in-out infinite alternate;
+}
+
+.wave:nth-child(1) {
+    bottom: -80px;
+    opacity: 0.3;
+    animation-duration: 11s;
+}
+
+.wave:nth-child(2) {
+    bottom: -60px;
+    opacity: 0.4;
+    animation-duration: 13s;
+    animation-delay: 0.5s;
+}
+
+.wave:nth-child(3) {
+    bottom: -40px;
+    opacity: 0.5;
+    animation-duration: 15s;
+    animation-delay: 1s;
+}
+
+.dark-mode .wave {
+    background: linear-gradient(transparent, rgba(78, 180, 243, 0.3));
+}
+
+.light-mode .wave {
+    background: linear-gradient(transparent, rgba(64, 164, 223, 0.2));
+}
+
+.bubble {
+    position: absolute;
+    bottom: -20px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.5);
+    animation: bubbleRise linear infinite;
+}
+
+.dark-mode .bubble {
+    background-color: rgba(255, 255, 255, 0.6);
+}
+
+.light-mode .bubble {
+    background-color: rgba(255, 255, 255, 0.4);
+}
+
+@keyframes waveMove {
+    0% {
+        transform: translateX(-50%);
+    }
+    100% {
+        transform: translateX(-30%);
+    }
+}
+
+@keyframes bubbleRise {
+    0% {
+        transform: translateY(0) translateX(0);
+        opacity: 0;
+    }
+    20% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-100vh) translateX(20px);
+        opacity: 0;
     }
 }
