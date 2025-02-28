@@ -1,13 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pomodoro Timer</title>
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body class="dark-mode">
     <main class="pomodoro-timer dark-mode">
+        <div class="dark-mode-toggle">
+            <input type="checkbox" id="dark-mode-toggle" checked style="display:none;">
+            <label for="dark-mode-toggle" class="toggle-label">
+                <span class="toggle-slider"></span>
+                <span class="toggle-moon">🌞</span>
+                <span class="toggle-sun">🌛</span>
+            </label>
+        </div>
         <h1>Pomodoro Timer</h1>
         <div id="timer" aria-live="polite">25:00</div>
         <form>
@@ -20,29 +30,19 @@
                 <input type="number" step="0.1" id="break-time" value="5" aria-label="Break Time">
             </div>
         </form>
-        <div class="sound-buttons">
-            <button id="rain-sound" class="sound-button" aria-label="Rain Sound">🌧️ Rain</button>
-            <button id="jungle-sound" class="sound-button" aria-label="Jungle Sound">🌳 Jungle</button>
-            <button id="ocean-sound" class="sound-button" aria-label="Ocean Sound">🌊 Ocean</button>
-        </div>
         <div class="control-buttons">
             <button id="start" aria-label="Start Timer">Start</button>
             <button id="reset" aria-label="Reset Timer">Reset</button>
         </div>
-        <div class="dark-mode-toggle">
-            <input type="checkbox" id="dark-mode-toggle" checked style="display:none;">
-            <label for="dark-mode-toggle" class="toggle-label">
-                <span class="toggle-slider"></span>
-                <span class="toggle-moon">🌞</span>
-                <span class="toggle-sun">🌛</span>
-            </label>
+        <div class="sound-buttons">
+            <button id="rain-sound" class="sound-button" aria-label="Rain Sound">🌧️</button>
+            <button id="jungle-sound" class="sound-button" aria-label="Jungle Sound">🌳</button>
+            <button id="ocean-sound" class="sound-button" aria-label="Ocean Sound">🌊</button>
         </div>
+        <audio id="sound-file" controls loop></audio>
     </main>
     <audio id="end-sound" src="sounds/countdown/end-sound.mp3"></audio>
-    <audio id="rain-sound-file" src="sounds/background/rain.mp3" loop></audio>
-    <audio id="jungle-sound-file" src="sounds/background/jungle.mp3" loop></audio>
-    <audio id="ocean-sound-file" src="sounds/background/ocean.mp3" loop></audio>
-    <script src="https://www.youtube.com/iframe_api"></script>
     <script src="script.js"></script>
 </body>
+
 </html>

@@ -17,14 +17,12 @@ const jungleSoundButton = document.getElementById('jungle-sound');
 const oceanSoundButton = document.getElementById('ocean-sound');
 const soundButtons = document.querySelectorAll('.sound-button');
 const darkModeToggle = document.getElementById('dark-mode-toggle');
-const rainSoundFile = document.getElementById('rain-sound-file');
-const jungleSoundFile = document.getElementById('jungle-sound-file');
-const oceanSoundFile = document.getElementById('ocean-sound-file');
+const soundFile = document.getElementById('sound-file');
 
 const sounds = {
-    rain: rainSoundFile,
-    jungle: jungleSoundFile,
-    ocean: oceanSoundFile
+    rain: 'sounds/background/rain.mp3',
+    jungle: 'sounds/background/jungle.mp3',
+    ocean: 'sounds/background/ocean.mp3'
 };
 
 function updateTimer() {
@@ -82,6 +80,7 @@ function resetTimer() {
 function changeSound(sound, button) {
     stopSound();
     selectedSound = sound;
+    soundFile.src = sounds[sound];
     if (isRunning) {
         playSound();
     }
@@ -90,19 +89,13 @@ function changeSound(sound, button) {
 }
 
 function playSound() {
-    if (sounds[selectedSound]) {
-        sounds[selectedSound].currentTime = 0;
-        sounds[selectedSound].play();
-    }
+    soundFile.currentTime = 0;
+    soundFile.play();
 }
 
 function stopSound() {
-    Object.values(sounds).forEach(sound => {
-        if (sound) {
-            sound.pause();
-            sound.currentTime = 0;
-        }
-    });
+    soundFile.pause();
+    soundFile.currentTime = 0;
 }
 
 function toggleDarkMode() {
@@ -116,6 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('.pomodoro-timer').classList.add('dark-mode');
     document.querySelectorAll('button').forEach(button => button.classList.add('dark-mode'));
     rainSoundButton.classList.add('active'); // Set rain sound button as active from the start
+    soundFile.src = sounds['rain']; // Set rain sound as default sound
 });
 
 rainSoundButton.addEventListener('click', () => changeSound('rain', rainSoundButton));
