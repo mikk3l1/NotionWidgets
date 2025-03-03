@@ -269,7 +269,7 @@ function updateTimer() {
     const seconds = timeLeft % 60;
     const formattedTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     timerElement.textContent = formattedTime;
-    document.title = `Pomodoro Timer - ${formattedTime}`;
+    document.title = `PLinneas Workspace - ${formattedTime}`;
 }
 
 function startTimer() {
