@@ -305,6 +305,19 @@ function updateTimer() {
     document.title = `PLinneas Workspace - ${formattedTime}`;
 }
 
+// Add a function to update the timer state styling
+function updateTimerState() {
+    // Remove both classes first
+    timerElement.classList.remove('timer-work', 'timer-break');
+    
+    // Add the appropriate class based on current state
+    if (isBreak) {
+        timerElement.classList.add('timer-break');
+    } else {
+        timerElement.classList.add('timer-work');
+    }
+}
+
 function startTimer() {
     if (!isRunning) {
         workTime = parseFloat(workTimeInput.value) * 60;
@@ -316,6 +329,9 @@ function startTimer() {
         } else {
             timeLeft = breakTime;
         }
+        
+        // Update timer state styling
+        updateTimerState();
         
         isRunning = true;
         updateTimer(); // Update display immediately
@@ -347,6 +363,9 @@ function startTimer() {
                     timeLeft = breakTime;
                 }
                 
+                // Update timer state styling after toggling
+                updateTimerState();
+                
                 // Start next timer
                 startTimer();
             }
@@ -361,6 +380,8 @@ function resetTimer() {
     workTime = parseFloat(workTimeInput.value) * 60;
     breakTime = parseFloat(breakTimeInput.value) * 60;
     timeLeft = workTime;
+    // Update timer state styling when reset (back to work state)
+    updateTimerState();
     // Removed stopSound() so ambient sound continues playing when timer is reset
     updateTimer();
 }
@@ -443,6 +464,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('button').forEach(button => button.classList.add('dark-mode'));
     rainSoundButton.classList.add('active'); // Set rain sound button as active from the start
     soundFile.src = sounds['rain']; // Set rain sound as default sound
+    
+    // Set initial timer state (work mode by default)
+    updateTimerState();
 });
 
 rainSoundButton.addEventListener('click', () => changeSound('rain', rainSoundButton));
