@@ -554,3 +554,16 @@ input[type="number"] {
 .toggle-small {
     margin-top: 10px;
 }
+
+/* Button icon styles */
+.button-icon {
+    width: 24px;
+    height: 24px;
+    display: block;
+    margin: 0 auto;
+}
+
+/* Dark mode styling for SVG icons */
+.dark-mode .button-icon {
+    filter: invert(1);
+}

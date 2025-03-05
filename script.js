@@ -320,20 +320,27 @@ function updateTimerState() {
 
 function startTimer() {
     if (!isRunning) {
-        workTime = parseFloat(workTimeInput.value) * 60;
-        breakTime = parseFloat(breakTimeInput.value) * 60;
-        
-        // Set up the timeLeft value based on mode
-        if (!isBreak) {
-            timeLeft = workTime;
-        } else {
-            timeLeft = breakTime;
+        // Only initialize the timer values when not resuming from pause
+        if (timeLeft === workTime || timeLeft === breakTime || timeLeft <= 0) {
+            workTime = parseFloat(workTimeInput.value) * 60;
+            breakTime = parseFloat(breakTimeInput.value) * 60;
+            
+            // Set up the timeLeft value based on mode
+            if (!isBreak) {
+                timeLeft = workTime;
+            } else {
+                timeLeft = breakTime;
+            }
         }
+        // Note: When resuming from pause, we keep the existing timeLeft value
         
         // Update timer state styling
         updateTimerState();
         
         isRunning = true;
+        // Change to pause icon
+        document.getElementById('play-pause-icon').src = "icons/pause.svg";
+        startButton.setAttribute('aria-label', 'Pause Timer');
         updateTimer(); // Update display immediately
         
         timer = setInterval(() => {
@@ -353,6 +360,9 @@ function startTimer() {
             if (timeLeft <= 0) {
                 clearInterval(timer);
                 isRunning = false;
+                // Change to play icon
+                document.getElementById('play-pause-icon').src = "icons/play.svg";
+                startButton.setAttribute('aria-label', 'Start Timer');
                 
                 // Toggle between work and break
                 if (isBreak) {
@@ -370,6 +380,14 @@ function startTimer() {
                 startTimer();
             }
         }, 1000);
+    } else {
+        // Pausing the timer
+        clearInterval(timer);
+        isRunning = false;
+        // Change to play icon
+        document.getElementById('play-pause-icon').src = "icons/play.svg";
+        startButton.setAttribute('aria-label', 'Start Timer');
+        // Note: We're keeping timeLeft as is, so we can resume from this point
     }
 }
 
@@ -377,6 +395,9 @@ function resetTimer() {
     clearInterval(timer);
     isRunning = false;
     isBreak = false;
+    // Ensure button shows play icon when reset
+    document.getElementById('play-pause-icon').src = "icons/play.svg";
+    startButton.setAttribute('aria-label', 'Start Timer');
     workTime = parseFloat(workTimeInput.value) * 60;
     breakTime = parseFloat(breakTimeInput.value) * 60;
     timeLeft = workTime;
@@ -434,7 +455,7 @@ soundFile.addEventListener('play', () => {
     }
 });
 
-soundFile.addEventListener('pause', stopAllAnimations);
+soundFile.addEventListener('Pause', stopAllAnimations);
 
 // Keep these functions for manual sound control through UI
 function playSound() {
