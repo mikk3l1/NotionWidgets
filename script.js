@@ -569,7 +569,20 @@ document.addEventListener('DOMContentLoaded', () => {
             this.textContent = previousVolume < 0.5 ? '🔉' : '🔊';
         }
     });
+    
+    // Initialize and set up digital clock
+    updateDigitalClock();
+    setInterval(updateDigitalClock, 1000);
 });
+
+// Digital Clock Functionality
+function updateDigitalClock() {
+    const now = new Date();
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    
+    document.getElementById('digital-clock').textContent = `${hours}:${minutes}`;
+}
 
 rainSoundButton.addEventListener('click', () => changeSound('rain', rainSoundButton));
 jungleSoundButton.addEventListener('click', () => changeSound('jungle', jungleSoundButton));
