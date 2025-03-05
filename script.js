@@ -269,7 +269,7 @@ function updateTimer() {
     const seconds = timeLeft % 60;
     const formattedTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     timerElement.textContent = formattedTime;
-    document.title = `Linneas Workspace - ${formattedTime}`;
+    document.title = `PLinneas Workspace - ${formattedTime}`;
 }
 
 function startTimer() {
@@ -392,6 +392,11 @@ function stopSound() {
     soundFile.pause();
     soundFile.currentTime = 0;
 }
+
+// Update dark mode toggle functionality
+document.getElementById('toggle--daynight').addEventListener('change', function() {
+    toggleDarkMode();
+});
 
 function toggleDarkMode() {
     document.body.classList.toggle('dark-mode');

@@ -110,11 +110,13 @@ button.dark-mode {
 
 .dark-mode-toggle {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 5px;
+    right: 5px;
     z-index: 10;
     margin: 0;
     padding: 0;
+    transform: scale(0.4);
+    transform-origin: top right;
 }
 
 .toggle-label {
@@ -510,4 +512,22 @@ input[type="number"] {
         transform: translateY(-100vh) translateX(20px);
         opacity: 0;
     }
+}
+
+/* Positioning and sizing for the toggle */
+.toggle-corner {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    margin: 0;
+}
+
+.toggle-small .toggle--btn {
+    transform: scale(0.5);
+    /* margin-top: -15px; */
+    margin-top: 0px;
+}
+
+.toggle-small {
+    margin-top: 10px;
 }

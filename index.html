@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Linneas Workspace</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="darkmode.css">
 </head>
 
 <body class="dark-mode">
@@ -19,14 +20,18 @@
         <!-- Waves will be added here by JavaScript -->
     </div>
     <main class="pomodoro-timer dark-mode">
-        <div class="dark-mode-toggle">
+        <div class="toggle--daynight dark-mode-toggle">
+            <input type="checkbox" id="toggle--daynight" class="toggle--checkbox">
+            <label class="toggle--btn" for="toggle--daynight"><span class="toggle--feature"></span></label>
+        </div>
+        <!-- <div class="dark-mode-toggle">
             <input type="checkbox" id="dark-mode-toggle" checked style="display:none;">
             <label for="dark-mode-toggle" class="toggle-label">
                 <span class="toggle-slider"></span>
                 <span class="toggle-moon">🌞</span>
                 <span class="toggle-sun">🌛</span>
             </label>
-        </div>
+        </div> -->
         <h1>Linneas Workspace</h1>
         <div id="timer" aria-live="polite">25:00</div>
         <form>
