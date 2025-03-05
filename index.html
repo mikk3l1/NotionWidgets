@@ -36,11 +36,11 @@
         <div id="timer" aria-live="polite">25:00</div>
         <form>
             <div>
-                <label for="work-time">Work Time (minutes):</label>
+                <label for="work-time">Work Time</label>
                 <input type="number" step="0.1" id="work-time" value="25" aria-label="Work Time">
             </div>
             <div>
-                <label for="break-time">Break Time (minutes):</label>
+                <label for="break-time">Break Time</label>
                 <input type="number" step="0.1" id="break-time" value="5" aria-label="Break Time">
             </div>
         </form>
@@ -57,7 +57,11 @@
             <button id="jungle-sound" class="sound-button" aria-label="Jungle Sound">🌴</button>
             <button id="ocean-sound" class="sound-button" aria-label="Ocean Sound">🌊</button>
         </div>
-        <audio id="sound-file" controls loop></audio>
+        <div class="volume-control">
+            <label for="volume-slider" class="volume-label">Volume</label>
+            <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.5">
+        </div>
+        <audio id="sound-file" loop></audio>
     </main>
     <audio id="end-sound" src="sounds/countdown/end-sound.mp3"></audio>
     <script src="script.js"></script>

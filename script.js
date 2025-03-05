@@ -407,11 +407,28 @@ function resetTimer() {
     updateTimer();
 }
 
-// Update changeSound function to handle all visual effects
+// Update changeSound function to handle all visual effects and toggle play/pause
 function changeSound(sound, button) {
-    // Keep the currently playing state
-    const wasPlaying = !soundFile.paused;
+    // If the same button is clicked again, toggle play/pause
+    if (button.classList.contains('active') && selectedSound === sound) {
+        if (soundFile.paused) {
+            soundFile.play();
+            // Make sure the appropriate animation starts
+            if (sound === 'rain') {
+                startRainAnimation();
+            } else if (sound === 'jungle') {
+                startJungleAnimation();
+            } else if (sound === 'ocean') {
+                startOceanAnimation();
+            }
+        } else {
+            soundFile.pause();
+            stopAllAnimations();
+        }
+        return;
+    }
     
+    // If a different button is clicked, change sound
     // Stop any current sound effects
     stopAllAnimations();
     
@@ -423,25 +440,23 @@ function changeSound(sound, button) {
     selectedSound = sound;
     soundFile.src = sounds[sound];
     
-    // If sound was playing before, start the new sound
-    if (wasPlaying) {
-        soundFile.play();
-        
-        // Start appropriate visual effect immediately
-        setTimeout(() => {
-            if (sound === 'rain') {
-                startRainAnimation();
-            } else if (sound === 'jungle') {
-                startJungleAnimation();
-            } else if (sound === 'ocean') {
-                startOceanAnimation();
-            }
-        }, 0); // Run on next tick to ensure immediate start
-    }
-    
     // Update the active button
     soundButtons.forEach(btn => btn.classList.remove('active'));
     button.classList.add('active');
+    
+    // Play the new sound
+    soundFile.play();
+    
+    // Start appropriate visual effect immediately
+    setTimeout(() => {
+        if (sound === 'rain') {
+            startRainAnimation();
+        } else if (sound === 'jungle') {
+            startJungleAnimation();
+        } else if (sound === 'ocean') {
+            startOceanAnimation();
+        }
+    }, 0);
 }
 
 // Add event listeners for audio playback to control animations
@@ -455,7 +470,8 @@ soundFile.addEventListener('play', () => {
     }
 });
 
-soundFile.addEventListener('Pause', stopAllAnimations);
+// Fix typo in the event listener name ('Pause' to 'pause')
+soundFile.addEventListener('pause', stopAllAnimations);
 
 // Keep these functions for manual sound control through UI
 function playSound() {
@@ -488,6 +504,15 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Set initial timer state (work mode by default)
     updateTimerState();
+    
+    // Set default volume
+    const volumeSlider = document.getElementById('volume-slider');
+    soundFile.volume = volumeSlider.value;
+    
+    // Volume change handler
+    volumeSlider.addEventListener('input', function() {
+        soundFile.volume = this.value;
+    });
 });
 
 rainSoundButton.addEventListener('click', () => changeSound('rain', rainSoundButton));
