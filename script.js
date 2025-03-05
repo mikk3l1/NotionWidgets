@@ -32,8 +32,31 @@ let rainAnimationId;
 let jungleAnimationId;
 let oceanAnimationId;
 
+let isPageVisible = true; // Track page visibility
+
+// Add page visibility detection
+document.addEventListener('visibilitychange', function() {
+    isPageVisible = document.visibilityState === 'visible';
+    
+    // When page becomes visible again, clean up accumulated animations
+    if (isPageVisible) {
+        if (jungleAnimationId) {
+            // Clean up excess leaves that might have accumulated
+            const existingLeaves = jungleContainer.querySelectorAll('.leaf');
+            if (existingLeaves.length > 30) {
+                // Keep only a reasonable number of leaves
+                for (let i = 30; i < existingLeaves.length; i++) {
+                    existingLeaves[i].remove();
+                }
+            }
+        }
+    }
+});
+
 // Create rain effect
 function createRain() {
+    if (!isPageVisible) return;
+
     const raindropsCount = 100;
     
     // Don't clear the container each time to prevent the visual "burst" at the beginning
@@ -108,12 +131,16 @@ function stopRainAnimation() {
 
 // Create jungle effect
 function createJungle() {
+    // Skip creating leaves if page is not visible
+    if (!isPageVisible) return;
+    
     const leavesCount = 30;
     
-    // Remove old leaves if too many
+    // Remove old leaves if too many - more aggressive cleanup
     const existingLeaves = jungleContainer.querySelectorAll('.leaf');
-    if (existingLeaves.length > 60) {
-        for (let i = 0; i < 15; i++) {
+    if (existingLeaves.length > 40) { // Reduced from 60 to 40
+        // Remove half of the existing leaves
+        for (let i = 0; i < Math.floor(existingLeaves.length / 2); i++) {
             if (existingLeaves[i]) {
                 existingLeaves[i].remove();
             }
@@ -163,8 +190,12 @@ function startJungleAnimation() {
         // Create first batch without delay
         createJungle();
         
-        // Continuously add leaves frequently
-        jungleAnimationId = setInterval(createJungle, 3000); // Even more frequent refreshes
+        // Continuously add leaves, using a function that checks visibility
+        jungleAnimationId = setInterval(() => {
+            if (isPageVisible) {
+                createJungle();
+            }
+        }, 3000);
     }
 }
 
@@ -195,6 +226,8 @@ function createOcean() {
     
     // Create bubbles gradually
     function createBubbles() {
+        if (!isPageVisible) return;
+
         // Limit bubbles to prevent performance issues
         const existingBubbles = oceanContainer.querySelectorAll('.bubble');
         if (existingBubbles.length > 50) return;
