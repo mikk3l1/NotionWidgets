@@ -302,7 +302,7 @@ function updateTimer() {
     const seconds = timeLeft % 60;
     const formattedTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     timerElement.textContent = formattedTime;
-    document.title = `PLinneas Workspace - ${formattedTime}`;
+    document.title = `${formattedTime} Linneas Workspace`;
 }
 
 // Add a function to update the timer state styling
