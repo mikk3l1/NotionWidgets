@@ -57,13 +57,15 @@
             <button id="jungle-sound" class="sound-button" aria-label="Jungle Sound">🌴</button>
             <button id="ocean-sound" class="sound-button" aria-label="Ocean Sound">🌊</button>
         </div>
-        <div class="volume-control">
-            <label for="volume-slider" class="volume-label">Volume</label>
-            <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.5">
-        </div>
         <audio id="sound-file" loop></audio>
+        <div class="volume-container">
+            <div class="volume-icon">🔊</div>
+            <div class="volume-slider-container">
+                <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.5" aria-label="Volume Control">
+            </div>
+        </div>
+        <audio id="end-sound" src="sounds/countdown/end-sound.mp3"></audio>
     </main>
-    <audio id="end-sound" src="sounds/countdown/end-sound.mp3"></audio>
     <script src="script.js"></script>
 </body>
 

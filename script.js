@@ -512,6 +512,33 @@ document.addEventListener('DOMContentLoaded', () => {
     // Volume change handler
     volumeSlider.addEventListener('input', function() {
         soundFile.volume = this.value;
+        
+        // Update volume icon based on volume level
+        const volumeIcon = document.querySelector('.volume-icon');
+        if (this.value === '0') {
+            volumeIcon.textContent = '🔇';
+        } else if (this.value < 0.5) {
+            volumeIcon.textContent = '🔉';
+        } else {
+            volumeIcon.textContent = '🔊';
+        }
+    });
+    
+    // Make volume icon clickable to mute/unmute
+    document.querySelector('.volume-icon').addEventListener('click', function() {
+        if (soundFile.volume > 0) {
+            // Store the current volume before muting
+            this.dataset.previousVolume = soundFile.volume;
+            soundFile.volume = 0;
+            volumeSlider.value = 0;
+            this.textContent = '🔇';
+        } else {
+            // Restore the previous volume or set to 0.5 if not stored
+            const previousVolume = this.dataset.previousVolume || 0.5;
+            soundFile.volume = previousVolume;
+            volumeSlider.value = previousVolume;
+            this.textContent = previousVolume < 0.5 ? '🔉' : '🔊';
+        }
     });
 });
 
