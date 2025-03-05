@@ -57,7 +57,7 @@ document.addEventListener('visibilitychange', function() {
 function createRain() {
     if (!isPageVisible) return;
 
-    const raindropsCount = 100;
+    const raindropsCount = 10;
     
     // Don't clear the container each time to prevent the visual "burst" at the beginning
     // Instead, remove only old raindrops that have completed their animation
@@ -134,7 +134,7 @@ function createJungle() {
     // Skip creating leaves if page is not visible
     if (!isPageVisible) return;
     
-    const leavesCount = 30;
+    const leavesCount = 10;
     
     // Remove old leaves if too many - more aggressive cleanup
     const existingLeaves = jungleContainer.querySelectorAll('.leaf');
