@@ -89,7 +89,8 @@ button {
     color: white;
 }
 
-.sound-button.active::after {
+/* Change icon based on sound playing status rather than just active state */
+.sound-button.active.sound-playing::after {
     content: '';
     position: absolute;
     bottom: 3px;
@@ -97,8 +98,47 @@ button {
     transform: translateX(-50%);
     width: 8px;
     height: 8px;
-    border-radius: 50%;
-    background-color: #ffffff;
+    background-image: url('icons/pause.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    filter: brightness(0) invert(1); /* Make icon white */
+}
+
+.sound-button.active:not(.sound-playing)::after {
+    content: '';
+    position: absolute;
+    bottom: 3px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 8px;
+    height: 8px;
+    background-image: url('icons/play.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    filter: brightness(0) invert(1); /* Make icon white */
+}
+
+.dark-mode .sound-button.active::after {
+    filter: brightness(0) invert(1); /* Keep icon white in dark mode */
+}
+
+/* When sound button is not active but hovered, show play icon */
+.sound-button:not(.active):hover::after {
+    content: '';
+    position: absolute;
+    bottom: 3px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 8px; /* Reduced from 16px */
+    height: 8px; /* Reduced from 16px */
+    background-image: url('icons/play.svg');;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0.8;
+    filter: brightness(0) invert(1); /* Make icon white */
 }
 
 @media (min-width: 600px) {

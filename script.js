@@ -413,6 +413,8 @@ function changeSound(sound, button) {
     if (button.classList.contains('active') && selectedSound === sound) {
         if (soundFile.paused) {
             soundFile.play();
+            // Add sound-playing class to the active button
+            button.classList.add('sound-playing');
             // Make sure the appropriate animation starts
             if (sound === 'rain') {
                 startRainAnimation();
@@ -423,6 +425,8 @@ function changeSound(sound, button) {
             }
         } else {
             soundFile.pause();
+            // Remove sound-playing class when paused
+            button.classList.remove('sound-playing');
             stopAllAnimations();
         }
         return;
@@ -440,12 +444,19 @@ function changeSound(sound, button) {
     selectedSound = sound;
     soundFile.src = sounds[sound];
     
+    // Remove sound-playing class from all buttons
+    soundButtons.forEach(btn => {
+        btn.classList.remove('active');
+        btn.classList.remove('sound-playing');
+    });
+    
     // Update the active button
-    soundButtons.forEach(btn => btn.classList.remove('active'));
     button.classList.add('active');
     
     // Play the new sound
     soundFile.play();
+    // Add sound-playing class when playing
+    button.classList.add('sound-playing');
     
     // Start appropriate visual effect immediately
     setTimeout(() => {
@@ -459,8 +470,15 @@ function changeSound(sound, button) {
     }, 0);
 }
 
-// Add event listeners for audio playback to control animations
+// Add event listeners for audio playback to control animations and icon state
 soundFile.addEventListener('play', () => {
+    // When sound plays, add sound-playing class to active button
+    soundButtons.forEach(btn => {
+        if (btn.classList.contains('active')) {
+            btn.classList.add('sound-playing');
+        }
+    });
+    
     if (selectedSound === 'rain') {
         startRainAnimation();
     } else if (selectedSound === 'jungle') {
@@ -470,8 +488,14 @@ soundFile.addEventListener('play', () => {
     }
 });
 
-// Fix typo in the event listener name ('Pause' to 'pause')
-soundFile.addEventListener('pause', stopAllAnimations);
+soundFile.addEventListener('pause', () => {
+    // When sound pauses, remove sound-playing class from all buttons
+    soundButtons.forEach(btn => {
+        btn.classList.remove('sound-playing');
+    });
+    
+    stopAllAnimations();
+});
 
 // Keep these functions for manual sound control through UI
 function playSound() {
@@ -501,6 +525,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('button').forEach(button => button.classList.add('dark-mode'));
     rainSoundButton.classList.add('active'); // Set rain sound button as active from the start
     soundFile.src = sounds['rain']; // Set rain sound as default sound
+    
+    // If autoplay is enabled and allowed by browser, add sound-playing class
+    soundFile.addEventListener('playing', function() {
+        rainSoundButton.classList.add('sound-playing');
+    });
     
     // Set initial timer state (work mode by default)
     updateTimerState();
