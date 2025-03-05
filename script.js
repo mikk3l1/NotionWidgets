@@ -393,6 +393,11 @@ function stopSound() {
     soundFile.currentTime = 0;
 }
 
+// Update dark mode toggle functionality
+document.getElementById('toggle--daynight').addEventListener('change', function() {
+    toggleDarkMode();
+});
+
 function toggleDarkMode() {
     document.body.classList.toggle('dark-mode');
     document.querySelector('.pomodoro-timer').classList.toggle('dark-mode');

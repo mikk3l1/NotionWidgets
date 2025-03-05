@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grid Drag & Drop</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Grid Drag & Drop</h1>
+        
+        <div class="controls">
+            <button id="addElement">Add Element</button>
+            <div class="size-controls">
+                <label>Element Size:</label>
+                <select id="elementSize">
+                    <option value="1">1x1</option>
+                    <option value="2">2x2</option>
+                    <option value="3">3x3</option>
+                    <option value="4">4x4</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="grid-container" id="grid">
+            <!-- Grid elements will be added here dynamically -->
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
