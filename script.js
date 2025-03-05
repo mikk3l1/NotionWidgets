@@ -523,8 +523,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.classList.add('dark-mode');
     document.querySelector('.pomodoro-timer').classList.add('dark-mode');
     document.querySelectorAll('button').forEach(button => button.classList.add('dark-mode'));
-    rainSoundButton.classList.add('active'); // Set rain sound button as active from the start
-    soundFile.src = sounds['rain']; // Set rain sound as default sound
+    // rainSoundButton.classList.add('active'); // Set rain sound button as active from the start
+    // soundFile.src = sounds['rain']; // Set rain sound as default sound
     
     // If autoplay is enabled and allowed by browser, add sound-playing class
     soundFile.addEventListener('playing', function() {
