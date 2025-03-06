@@ -258,20 +258,39 @@ function createOcean() {
         }, duration * 1000);
     }
     
+    // Track recently used fish types to avoid repetition
+    let recentFishTypes = [];
+    
     // Create fish jumping animation - update position fish relative to wave layers
     function createJumpingFish() {
         if (!isPageVisible) return;
         
-        
         // Available fish types
         const fishTypes = ['fish-blue', 'fish-goldfish', 'fish-yellow', 'fish-tuna', 'fish-siamese', 'fish-prawn'];
+        
+        // Select a fish type that wasn't recently used
+        let fishType;
+        const availableTypes = fishTypes.filter(type => !recentFishTypes.includes(type));
+        
+        if (availableTypes.length > 0) {
+            // If we have unused types, select from those
+            fishType = availableTypes[Math.floor(Math.random() * availableTypes.length)];
+        } else {
+            // If all types have been used recently, select any random type
+            fishType = fishTypes[Math.floor(Math.random() * fishTypes.length)];
+            // And reset the recent types tracking
+            recentFishTypes = [];
+        }
+        
+        // Add this type to recently used (keep only last 3 types in history)
+        recentFishTypes.push(fishType);
+        if (recentFishTypes.length > 3) {
+            recentFishTypes.shift(); // Remove oldest type
+        }
         
         // Create a new fish element
         const fish = document.createElement('div');
         fish.classList.add('ocean-fish');
-        
-        // Select a random fish type
-        const fishType = fishTypes[Math.floor(Math.random() * fishTypes.length)];
         fish.classList.add(fishType);
         
         // Position fish at random horizontal location
