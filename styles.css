@@ -33,17 +33,20 @@ h1 {
     transition: color 0.5s ease, background-color 0.5s ease;
 }
 
-#timer.timer-work, #timer.timer-break {
+#timer.timer-work,
+#timer.timer-break {
     padding: 10px;
     border-radius: 8px;
 }
 
 #timer.timer-work {
-    background-color: rgba(76, 175, 80, 0.3); /* Increased opacity for better visibility */
+    background-color: rgba(76, 175, 80, 0.3);
+    /* Increased opacity for better visibility */
 }
 
 #timer.timer-break {
-    background-color: rgba(244, 67, 54, 0.2); /* Subtle red background */
+    background-color: rgba(244, 67, 54, 0.2);
+    /* Subtle red background */
 }
 
 /* Dark mode adjustments */
@@ -102,7 +105,8 @@ button {
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
-    filter: brightness(0) invert(1); /* Make icon white */
+    filter: brightness(0) invert(1);
+    /* Make icon white */
 }
 
 .sound-button.active:not(.sound-playing)::after {
@@ -117,11 +121,13 @@ button {
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
-    filter: brightness(0) invert(1); /* Make icon white */
+    filter: brightness(0) invert(1);
+    /* Make icon white */
 }
 
 .dark-mode .sound-button.active::after {
-    filter: brightness(0) invert(1); /* Keep icon white in dark mode */
+    filter: brightness(0) invert(1);
+    /* Keep icon white in dark mode */
 }
 
 /* When sound button is not active but hovered, show play icon */
@@ -131,14 +137,18 @@ button {
     bottom: 3px;
     left: 50%;
     transform: translateX(-50%);
-    width: 8px; /* Reduced from 16px */
-    height: 8px; /* Reduced from 16px */
-    background-image: url('icons/play.svg');;
+    width: 8px;
+    /* Reduced from 16px */
+    height: 8px;
+    /* Reduced from 16px */
+    background-image: url('icons/play.svg');
+    ;
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
     opacity: 0.8;
-    filter: brightness(0) invert(1); /* Make icon white */
+    filter: brightness(0) invert(1);
+    /* Make icon white */
 }
 
 @media (min-width: 600px) {
@@ -229,11 +239,11 @@ button.dark-mode {
     transition: 0.4s;
 }
 
-input:checked + .toggle-label .toggle-slider {
+input:checked+.toggle-label .toggle-slider {
     background-color: #2196F3;
 }
 
-input:checked + .toggle-label .toggle-slider:before {
+input:checked+.toggle-label .toggle-slider:before {
     transform: translateX(30px);
 }
 
@@ -244,7 +254,8 @@ input:checked + .toggle-label .toggle-slider:before {
     transform: translateY(-50%);
     font-size: 16px;
     transition: transform 0.4s, opacity 0.4s;
-    user-select: none; /* Prevent text selection */
+    user-select: none;
+    /* Prevent text selection */
 }
 
 .toggle-moon {
@@ -257,22 +268,22 @@ input:checked + .toggle-label .toggle-slider:before {
     opacity: 1;
 }
 
-input:not(:checked) + .toggle-label .toggle-moon {
+input:not(:checked)+.toggle-label .toggle-moon {
     opacity: 1;
     transform: translateY(-50%) translateX(30px);
 }
 
-input:not(:checked) + .toggle-label .toggle-sun {
+input:not(:checked)+.toggle-label .toggle-sun {
     opacity: 0;
     transform: translateY(-50%) translateX(0);
 }
 
-input:checked + .toggle-label .toggle-moon {
+input:checked+.toggle-label .toggle-moon {
     opacity: 0;
     transform: translateY(-50%) translateX(30px);
 }
 
-input:checked + .toggle-label .toggle-sun {
+input:checked+.toggle-label .toggle-sun {
     opacity: 1;
     transform: translateY(-50%) translateX(-30px);
 }
@@ -437,7 +448,8 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 input[type="number"] {
-    -moz-appearance: textfield; /* Firefox */
+    -moz-appearance: textfield;
+    /* Firefox */
 }
 
 /* Dark mode styles for input fields */
@@ -458,7 +470,7 @@ input[type="number"] {
         justify-content: center;
         gap: 10px;
     }
-    
+
     label {
         margin-bottom: 0;
     }
@@ -511,9 +523,11 @@ input[type="number"] {
         transform: translateY(-120vh);
         opacity: 0;
     }
+
     10% {
         opacity: 0.6;
     }
+
     100% {
         transform: translateY(120vh);
         opacity: 0.6;
@@ -529,10 +543,12 @@ input[type="number"] {
     background-repeat: no-repeat;
     background-position: center;
     opacity: 0;
-    transform: translateY(-120vh); /* Start above viewport */
+    transform: translateY(-120vh);
+    /* Start above viewport */
     animation: leafFall linear infinite;
     animation-fill-mode: forwards;
-    will-change: transform, opacity; /* Performance optimization */
+    will-change: transform, opacity;
+    /* Performance optimization */
 }
 
 .leaf.leaf1 {
@@ -560,80 +576,264 @@ input[type="number"] {
         transform: translateY(-120vh) rotate(0deg);
         opacity: 0;
     }
-    2% { /* Even faster fade in */
+
+    2% {
+        /* Even faster fade in */
         opacity: 0.8;
     }
+
     100% {
         transform: translateY(120vh) rotate(360deg);
         opacity: 0.8;
     }
 }
 
-/* Ocean Effect Styles */
-.wave {
+/* Enhanced Ocean Effect Styles - Layered Cardboard-style Waves with Curves */
+.ocean-container {
+    perspective: 1000px;
+    transform-style: preserve-3d;
+}
+
+.wave-layer {
     position: absolute;
+    width: 120%;
+    left: -10%;
     bottom: 0;
+    /* All layers now align to bottom of screen */
+    transform-origin: center bottom;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    pointer-events: none;
+    z-index: -1;
+    overflow: hidden;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+/* Fix wave layer z-index ordering to ensure proper stacking */
+.wave-layer:nth-child(1) {
+    height: 250px; /* Increase height to ensure coverage */
+    margin-bottom: -20px; /* Push slightly below the bottom of the viewport */
+    background-color: #003366; /* Darkest blue - bottom layer */
+    z-index: -5;
+    clip-path: polygon(100% 100%, 0% 100% , 0.00% 56.67%, 2.00% 56.46%, 4.00% 55.84%, 6.00% 54.86%, 8.00% 53.57%, 10.00% 52.06%, 12.00% 50.42%, 14.00% 48.75%, 16.00% 47.16%, 18.00% 45.75%, 20.00% 44.61%, 22.00% 43.80%, 24.00% 43.39%, 26.00% 43.39%, 28.00% 43.80%, 30.00% 44.61%, 32.00% 45.75%, 34.00% 47.16%, 36.00% 48.75%, 38.00% 50.42%, 40.00% 52.06%, 42.00% 53.57%, 44.00% 54.86%, 46.00% 55.84%, 48.00% 56.46%, 50.00% 56.67%, 52.00% 56.46%, 54.00% 55.84%, 56.00% 54.86%, 58.00% 53.57%, 60.00% 52.06%, 62.00% 50.42%, 64.00% 48.75%, 66.00% 47.16%, 68.00% 45.75%, 70.00% 44.61%, 72.00% 43.80%, 74.00% 43.39%, 76.00% 43.39%, 78.00% 43.80%, 80.00% 44.61%, 82.00% 45.75%, 84.00% 47.16%, 86.00% 48.75%, 88.00% 50.42%, 90.00% 52.06%, 92.00% 53.57%, 94.00% 54.86%, 96.00% 55.84%, 98.00% 56.46%, 100.00% 56.67%);
+    animation: waveBob1 6s ease-in-out infinite alternate;
+}
+
+.wave-layer:nth-child(2) {
+    height: 300px;
+    background-color: #0066cc;
+    z-index: -6;
+    clip-path: polygon(100% 100%, 0% 100% , 0.00% 44.89%, 2.00% 43.99%, 4.00% 43.46%, 6.00% 43.34%, 8.00% 43.65%, 10.00% 44.35%, 12.00% 45.40%, 14.00% 46.75%, 16.00% 48.30%, 18.00% 49.95%, 20.00% 51.61%, 22.00% 53.17%, 24.00% 54.53%, 26.00% 55.60%, 28.00% 56.33%, 30.00% 56.65%, 32.00% 56.56%, 34.00% 56.05%, 36.00% 55.17%, 38.00% 53.96%, 40.00% 52.50%, 42.00% 50.88%, 44.00% 49.21%, 46.00% 47.59%, 48.00% 46.12%, 50.00% 44.89%, 52.00% 43.99%, 54.00% 43.46%, 56.00% 43.34%, 58.00% 43.65%, 60.00% 44.35%, 62.00% 45.40%, 64.00% 46.75%, 66.00% 48.30%, 68.00% 49.95%, 70.00% 51.61%, 72.00% 53.17%, 74.00% 54.53%, 76.00% 55.60%, 78.00% 56.33%, 80.00% 56.65%, 82.00% 56.56%, 84.00% 56.05%, 86.00% 55.17%, 88.00% 53.96%, 90.00% 52.50%, 92.00% 50.88%, 94.00% 49.21%, 96.00% 47.59%, 98.00% 46.12%, 100.00% 44.89%);
+    animation: waveBob2 7s ease-in-out infinite alternate;
+}
+
+.wave-layer:nth-child(3) {
+    height: 420px;
+    background-color: #3399ff;
+    z-index: -7;
+    clip-path: polygon(100% 100%, 0% 100% , 0.00% 43.74%, 2.00% 44.50%, 4.00% 45.61%, 6.00% 46.99%, 8.00% 48.57%, 10.00% 50.23%, 12.00% 51.88%, 14.00% 53.41%, 16.00% 54.73%, 18.00% 55.75%, 20.00% 56.41%, 22.00% 56.66%, 24.00% 56.50%, 26.00% 55.93%, 28.00% 54.99%, 30.00% 53.73%, 32.00% 52.24%, 34.00% 50.60%, 36.00% 48.93%, 38.00% 47.33%, 40.00% 45.90%, 42.00% 44.72%, 44.00% 43.87%, 46.00% 43.41%, 48.00% 43.37%, 50.00% 43.74%, 52.00% 44.50%, 54.00% 45.61%, 56.00% 46.99%, 58.00% 48.57%, 60.00% 50.23%, 62.00% 51.88%, 64.00% 53.41%, 66.00% 54.73%, 68.00% 55.75%, 70.00% 56.41%, 72.00% 56.66%, 74.00% 56.50%, 76.00% 55.93%, 78.00% 54.99%, 80.00% 53.73%, 82.00% 52.24%, 84.00% 50.60%, 86.00% 48.93%, 88.00% 47.33%, 90.00% 45.90%, 92.00% 44.72%, 94.00% 43.87%, 96.00% 43.41%, 98.00% 43.37%, 100.00% 43.74%);
+    animation: waveBob3 5.5s ease-in-out infinite alternate;
+}
+
+.wave-layer:nth-child(4) {
+    height: 480px;
+    background-color: #66b3ff;
+    z-index: -8;
+    clip-path: polygon(100% 100%, 0% 100% , 0.00% 56.26%, 2.00% 56.63%, 4.00% 56.59%, 6.00% 56.13%, 8.00% 55.28%, 10.00% 54.10%, 12.00% 52.67%, 14.00% 51.07%, 16.00% 49.40%, 18.00% 47.76%, 20.00% 46.27%, 22.00% 45.01%, 24.00% 44.07%, 26.00% 43.50%, 28.00% 43.34%, 30.00% 43.59%, 32.00% 44.25%, 34.00% 45.27%, 36.00% 46.59%, 38.00% 48.12%, 40.00% 49.77%, 42.00% 51.43%, 44.00% 53.01%, 46.00% 54.39%, 48.00% 55.50%, 50.00% 56.26%, 52.00% 56.63%, 54.00% 56.59%, 56.00% 56.13%, 58.00% 55.28%, 60.00% 54.10%, 62.00% 52.67%, 64.00% 51.07%, 66.00% 49.40%, 68.00% 47.76%, 70.00% 46.27%, 72.00% 45.01%, 74.00% 44.07%, 76.00% 43.50%, 78.00% 43.34%, 80.00% 43.59%, 82.00% 44.25%, 84.00% 45.27%, 86.00% 46.59%, 88.00% 48.12%, 90.00% 49.77%, 92.00% 51.43%, 94.00% 53.01%, 96.00% 54.39%, 98.00% 55.50%, 100.00% 56.26%);
+    animation: waveBob4 4.5s ease-in-out infinite alternate;
+}
+
+.wave-layer:nth-child(5) {
+    height: 600px;
+    background-color: #99ccff; /* Lightest blue - top layer */
+    z-index: -9;
+    clip-path: polygon(100% 100%, 0% 100% , 0.00% 46.37%, 2.00% 45.09%, 4.00% 44.12%, 6.00% 43.53%, 8.00% 43.33%, 10.00% 43.56%, 12.00% 44.19%, 14.00% 45.19%, 16.00% 46.49%, 18.00% 48.01%, 20.00% 49.65%, 22.00% 51.32%, 24.00% 52.90%, 26.00% 54.30%, 28.00% 55.43%, 30.00% 56.22%, 32.00% 56.62%, 34.00% 56.60%, 36.00% 56.17%, 38.00% 55.35%, 40.00% 54.20%, 42.00% 52.78%, 44.00% 51.18%, 46.00% 49.51%, 48.00% 47.87%, 50.00% 46.37%, 52.00% 45.09%, 54.00% 44.12%, 56.00% 43.53%, 58.00% 43.33%, 60.00% 43.56%, 62.00% 44.19%, 64.00% 45.19%, 66.00% 46.49%, 68.00% 48.01%, 70.00% 49.65%, 72.00% 51.32%, 74.00% 52.90%, 76.00% 54.30%, 78.00% 55.43%, 80.00% 56.22%, 82.00% 56.62%, 84.00% 56.60%, 86.00% 56.17%, 88.00% 55.35%, 90.00% 54.20%, 92.00% 52.78%, 94.00% 51.18%, 96.00% 49.51%, 98.00% 47.87%, 100.00% 46.37%);
+    animation: waveBob5 6.5s ease-in-out infinite alternate;
+}
+
+/* Wave top highlight - adds white trim to the wave peaks */
+.wave-layer::before {
+    content: '';
+    position: absolute;
+    top: 0;
     left: 0;
-    width: 200%;
-    height: 100px;
-    background: linear-gradient(transparent, rgba(64, 164, 223, 0.2));
-    border-radius: 50% 50% 0 0 / 100% 100% 0 0;
-    animation: waveMove ease-in-out infinite alternate;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom,
+            rgba(255, 255, 255, 0.8) 0%,
+            rgba(255, 255, 255, 0.4) 8%,
+            rgba(255, 255, 255, 0) 15%);
+    z-index: 1;
+    pointer-events: none;
 }
 
-.wave:nth-child(1) {
-    bottom: -80px;
-    opacity: 0.3;
-    animation-duration: 11s;
+/* Wave animations with different timings */
+@keyframes waveBob1 {
+
+    0%,
+    100% {
+        transform: translateY(5px); /* Less downward movement */
+    }
+
+    50% {
+        transform: translateY(-2px); /* Less upward movement to prevent gap */
+    }
 }
 
-.wave:nth-child(2) {
-    bottom: -60px;
-    opacity: 0.4;
-    animation-duration: 13s;
-    animation-delay: 0.5s;
+@keyframes waveBob2 {
+
+    0%,
+    100% {
+        transform: translateY(-5px);
+    }
+
+    50% {
+        transform: translateY(5px);
+    }
 }
 
-.wave:nth-child(3) {
-    bottom: -40px;
-    opacity: 0.5;
-    animation-duration: 15s;
-    animation-delay: 1s;
+@keyframes waveBob3 {
+
+    0%,
+    100% {
+        transform: translateY(7px);
+    }
+
+    50% {
+        transform: translateY(-7px);
+    }
 }
 
-.dark-mode .wave {
-    background: linear-gradient(transparent, rgba(78, 180, 243, 0.3));
+@keyframes waveBob4 {
+
+    0%,
+    100% {
+        transform: translateY(-6px);
+    }
+
+    50% {
+        transform: translateY(6px);
+    }
 }
 
-.light-mode .wave {
-    background: linear-gradient(transparent, rgba(64, 164, 223, 0.2));
+@keyframes waveBob5 {
+
+    0%,
+    100% {
+        transform: translateY(4px);
+    }
+
+    50% {
+        transform: translateY(-4px);
+    }
+}
+
+/* Fish animation styles */
+.ocean-fish {
+    position: absolute;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 50px;
+    height: 30px;
+    opacity: 0;
+    z-index: -1; /* Make fish appear above wave layers */
+    transform-origin: center;
+    pointer-events: none;
+    transform: scaleX(-1); /* Flip fish horizontally so head is on the right side */
+}
+
+/* Fish variant styles */
+.fish-blue {
+    background-image: url('fish/fish-blue.svg');
+    width: 40px;
+    height: 25px;
+}
+
+.fish-goldfish {
+    background-image: url('fish/fish-goldfish.svg');
+    width: 42px;
+    height: 28px;
+}
+
+.fish-yellow {
+    background-image: url('fish/fish-yellow.svg');
+    width: 45px;
+    height: 30px;
+}
+
+.fish-tuna {
+    background-image: url('fish/fish-tuna.svg');
+    width: 48px;
+    height: 32px;
+}
+
+.fish-siamese {
+    background-image: url('fish/fish-siamese-fighting.svg');
+    width: 38px;
+    height: 26px;
+}
+
+.fish-prawn {
+    background-image: url('fish/prawn.svg');
+    width: 32px;
+    height: 22px;
+}
+
+.ocean-fish.jumping {
+    /* animation: fishJump 4s ease-in-out forwards; */
+    animation: fishJump 4s linear forwards;
+    z-index: 0;  /* Ensure jumping fish appear above waves */
+}
+
+@keyframes fishJump {
+    0% {
+        opacity: 0;
+        transform: translate(0, 50px) rotate(0deg) scaleX(-1);
+    }
+
+    10% {
+        opacity: 1;
+        transform: translate(10px, 20px) rotate(-15deg) scaleX(-1);
+    }
+
+    30% {
+        transform: translate(30px, -50px) rotate(-30deg) scaleX(-1);
+    }
+
+    50% {
+        transform: translate(50px, -80px) rotate(-15deg) scaleX(-1);
+    }
+
+    70% {
+        transform: translate(70px, -30px) rotate(15deg) scaleX(-1);
+    }
+
+    90% {
+        opacity: 1;
+        transform: translate(90px, 20px) rotate(30deg) scaleX(-1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translate(100px, 50px) rotate(0deg) scaleX(-1);
+    }
+}
+
+.dark-mode .ocean-fish {
+    filter: brightness(1.2) saturate(1.1);
 }
 
 .bubble {
     position: absolute;
-    bottom: -20px;
+    bottom: -10px;
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.5);
-    animation: bubbleRise linear infinite;
-}
-
-.dark-mode .bubble {
     background-color: rgba(255, 255, 255, 0.6);
-}
-
-.light-mode .bubble {
-    background-color: rgba(255, 255, 255, 0.4);
-}
-
-@keyframes waveMove {
-    0% {
-        transform: translateX(-50%);
-    }
-    100% {
-        transform: translateX(-30%);
-    }
+    animation: bubbleRise linear infinite;
+    z-index: -1;
 }
 
 @keyframes bubbleRise {
@@ -641,11 +841,13 @@ input[type="number"] {
         transform: translateY(0) translateX(0);
         opacity: 0;
     }
+
     20% {
-        opacity: 1;
+        opacity: 0.8;
     }
+
     100% {
-        transform: translateY(-100vh) translateX(20px);
+        transform: translateY(-150vh) translateX(30px);
         opacity: 0;
     }
 }
@@ -711,7 +913,8 @@ input[type="number"] {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 40px; /* Use min-width to prevent shrinking */
+    min-width: 40px;
+    /* Use min-width to prevent shrinking */
     height: 40px;
     cursor: pointer;
     font-size: 18px;
@@ -722,7 +925,8 @@ input[type="number"] {
     width: 0;
     overflow: hidden;
     transition: width 0.3s ease;
-    margin-left: 0; /* Ensure no margin pushes content */
+    margin-left: 0;
+    /* Ensure no margin pushes content */
 }
 
 .volume-container:hover .volume-slider-container {
@@ -770,22 +974,28 @@ input[type="number"] {
 /* Repositioned Volume Control - Fixed in bottom right corner */
 .volume-container {
     display: flex;
-    flex-direction: column-reverse; /* Stack elements from bottom to top */
+    flex-direction: column-reverse;
+    /* Stack elements from bottom to top */
     align-items: center;
-    position: absolute; /* Position absolutely */
-    bottom: 10px; /* Position at bottom */
-    right: 10px; /* Position at right */
+    position: absolute;
+    /* Position absolutely */
+    bottom: 10px;
+    /* Position at bottom */
+    right: 10px;
+    /* Position at right */
     width: 40px;
     height: 40px;
     transition: height 0.3s ease;
     overflow: hidden;
     border-radius: 20px;
-    z-index: 5; /* Ensure it appears above other elements */
+    z-index: 5;
+    /* Ensure it appears above other elements */
     background-color: transparent;
 }
 
 .volume-container:hover {
-    height: 150px; /* Expand upward */
+    height: 150px;
+    /* Expand upward */
     background-color: rgba(0, 0, 0, 0.1);
 }
 
@@ -797,7 +1007,8 @@ input[type="number"] {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 40px; /* Use min-height instead of min-width */
+    min-height: 40px;
+    /* Use min-height instead of min-width */
     width: 40px;
     cursor: pointer;
     font-size: 18px;
@@ -805,8 +1016,10 @@ input[type="number"] {
 }
 
 .volume-slider-container {
-    height: 0; /* Start with zero height */
-    width: 100%; /* Full width of container */
+    height: 0;
+    /* Start with zero height */
+    width: 100%;
+    /* Full width of container */
     overflow: hidden;
     transition: height 0.3s ease;
     display: flex;
@@ -816,21 +1029,25 @@ input[type="number"] {
 }
 
 .volume-container:hover .volume-slider-container {
-    height: 100px; /* Expand to this height */
+    height: 100px;
+    /* Expand to this height */
     padding-top: 10px;
     padding-bottom: 10px;
 }
 
 #volume-slider {
     -webkit-appearance: none;
-    width: 100px; /* Fixed width */
-    height: 4px; /* This becomes the width when rotated */
+    width: 100px;
+    /* Fixed width */
+    height: 4px;
+    /* This becomes the width when rotated */
     border-radius: 2px;
     background: #ddd;
     outline: none;
     opacity: 0.7;
     transition: opacity .2s;
-    transform: rotate(270deg); /* Rotate the slider to be vertical */
+    transform: rotate(270deg);
+    /* Rotate the slider to be vertical */
 }
 
 /* Digital Clock Styles */
