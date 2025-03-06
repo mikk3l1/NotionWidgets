@@ -212,16 +212,16 @@ function stopJungleAnimation() {
     }
 }
 
-// Create ocean effect
+// Create ocean effect with layered waves and jumping fish
 function createOcean() {
-    // Clear container first for waves
+    // Clear container first
     oceanContainer.innerHTML = '';
     
-    // Create waves
-    for (let i = 0; i < 3; i++) {
-        const wave = document.createElement('div');
-        wave.classList.add('wave');
-        oceanContainer.appendChild(wave);
+    // Create 5 wave layers
+    for (let i = 0; i < 5; i++) {
+        const waveLayer = document.createElement('div');
+        waveLayer.classList.add('wave-layer');
+        oceanContainer.appendChild(waveLayer);
     }
     
     // Create bubbles gradually
@@ -230,16 +230,16 @@ function createOcean() {
 
         // Limit bubbles to prevent performance issues
         const existingBubbles = oceanContainer.querySelectorAll('.bubble');
-        if (existingBubbles.length > 50) return;
+        if (existingBubbles.length > 30) return;
         
         const bubble = document.createElement('div');
         bubble.classList.add('bubble');
         
         // Randomize bubble properties
-        const size = Math.random() * 5 + 3;
+        const size = Math.random() * 4 + 2;
         const posX = Math.floor(Math.random() * window.innerWidth);
-        const duration = Math.random() * 8 + 4;
-        const opacity = Math.random() * 0.5 + 0.2;
+        const duration = Math.random() * 7 + 3;
+        const opacity = Math.random() * 0.5 + 0.3;
         
         // Apply styles
         bubble.style.left = `${posX}px`;
@@ -252,25 +252,87 @@ function createOcean() {
         
         // Remove bubble after animation completes
         setTimeout(() => {
-            if (bubble.parentNode === oceanContainer) {
+            if (bubble && bubble.parentNode === oceanContainer) {
                 bubble.remove();
             }
         }, duration * 1000);
     }
     
-    // Create initial bubbles and start creating more
-    for (let i = 0; i < 20; i++) {
+    // Create fish jumping animation - update position fish relative to wave layers
+    function createJumpingFish() {
+        if (!isPageVisible) return;
+        
+        
+        // Available fish types
+        const fishTypes = ['fish-blue', 'fish-goldfish', 'fish-yellow', 'fish-tuna', 'fish-siamese', 'fish-prawn'];
+        
+        // Create a new fish element
+        const fish = document.createElement('div');
+        fish.classList.add('ocean-fish');
+        
+        // Select a random fish type
+        const fishType = fishTypes[Math.floor(Math.random() * fishTypes.length)];
+        fish.classList.add(fishType);
+        
+        // Position fish at random horizontal location
+        const posX = Math.floor(Math.random() * (window.innerWidth - 150));
+        fish.style.left = `${posX}px`;
+        
+        // Set a random z-index for the fish to appear between different wave layers
+        const zIndex = Math.floor(Math.random() * 5) - 4; // Values from -4 to 0
+        fish.style.zIndex = zIndex;
+        
+        // Position fish at random vertical location between waves
+        const wavePositions = [290, 240, 190, 140, 90]; // Updated positions to align with wave heights
+        const posYIndex = Math.min(Math.abs(zIndex + 4), 4); // Correlate z-index with wave position
+        const posY = wavePositions[posYIndex];
+        fish.style.bottom = `${posY}px`;
+        
+        // Add fish to container
+        oceanContainer.appendChild(fish);
+        
+        // Start fish jumping animation
+        setTimeout(() => {
+            fish.classList.add('jumping');
+            
+            // Remove fish after animation completes
+            setTimeout(() => {
+                if (fish && fish.parentNode === oceanContainer) {
+                    fish.remove();
+                }
+            }, 4000);
+        }, 50);
+    }
+    
+    // Create initial bubbles
+    for (let i = 0; i < 10; i++) {
         setTimeout(createBubbles, i * 300);
     }
     
-    return setInterval(createBubbles, 300);
+    // Create initial fish - but not more than the max (5)
+    for (let i = 0; i < Math.min(1, 5); i++) {
+        setTimeout(createJumpingFish, (i * 1000) + Math.random() * 1000);
+    }
+    
+    // Set up intervals for continuous animations
+    const bubbleInterval = setInterval(createBubbles, 500);
+    
+    // Slightly longer interval between fish jumps now that we limit the total
+    const fishInterval = setInterval(createJumpingFish, 9000 + Math.random() * 2000);
+    
+    // Return cleanup function that clears both intervals
+    return () => {
+        clearInterval(bubbleInterval);
+        clearInterval(fishInterval);
+    };
 }
 
 function startOceanAnimation() {
     if (!oceanAnimationId) {
+        // Add the active class to start fading in
         oceanContainer.classList.add('active');
         
-        // Create waves immediately
+        // Create ocean effect with slight delay
         setTimeout(() => {
             oceanAnimationId = createOcean();
         }, 100);
@@ -279,11 +341,14 @@ function startOceanAnimation() {
 
 function stopOceanAnimation() {
     if (oceanAnimationId) {
-        clearInterval(oceanAnimationId);
+        // Call the cleanup function returned from createOcean
+        oceanAnimationId();
         oceanAnimationId = null;
         
+        // Fade out the container
         oceanContainer.classList.remove('active');
         
+        // Clean up after fade animation completes
         setTimeout(() => {
             oceanContainer.innerHTML = '';
         }, 2000);
