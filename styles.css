@@ -993,6 +993,13 @@ input[type="number"] {
     background-color: transparent;
 }
 
+/* Hide volume controls on mobile devices */
+@media (max-width: 768px) {
+    .volume-container {
+        display: none;
+    }
+}
+
 .volume-container:hover {
     height: 150px;
     /* Expand upward */
