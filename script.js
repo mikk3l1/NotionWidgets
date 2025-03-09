@@ -603,6 +603,27 @@ function toggleDarkMode() {
     document.querySelectorAll('button').forEach(button => button.classList.toggle('dark-mode'));
 }
 
+// function getDeviceType() {
+//     const userAgent = navigator.userAgent;
+//   if (/Mobi|Android/i.test(userAgent)) {
+//       return "Mobile";
+//     } else if (/Tablet|iPad/i.test(userAgent)) {
+//       return "Tablet";
+//     } else {
+//       return "Desktop";
+//     }
+//   }
+
+
+function getDeviceType() {
+    const userAgent = navigator.userAgent;
+    if (/Mobi|Android|Tablet|iPad/.test(userAgent)) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     document.body.classList.add('dark-mode');
     document.querySelector('.pomodoro-timer').classList.add('dark-mode');
@@ -619,51 +640,59 @@ document.addEventListener('DOMContentLoaded', () => {
     updateTimerState();
     
     // Check if device is mobile or tablet
-    const isMobileOrTablet = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isMobileOrTablet = getDeviceType();
     
-    // Volume control setup - don't bother with setup on mobile devices
+    console.log('isMobileOrTablet:',isMobileOrTablet);
+
+    // Volume control setup - completely hide on mobile devices
     const volumeSlider = document.getElementById('volume-slider');
     const volumeContainer = document.querySelector('.volume-container');
     
-    if (!isMobileOrTablet && volumeContainer) {
-        // Set default volume (scaled down to 25% of original maximum)
-        soundFile.volume = volumeSlider.value * 0.5; // Scale slider value by 0.5
-        
-        // Volume change handler - scale down volume to 50% maximum
-        volumeSlider.addEventListener('input', function() {
-            // Scale the slider value (0-1) to a maximum of 0.5 for the actual audio
-            soundFile.volume = this.value * 0.5;
+    if (volumeContainer) {
+        if (isMobileOrTablet) {
+            // Hide the volume container completely for mobile devices
+            volumeContainer.style.display = 'none';
             
-            // Update volume icon based on relative volume level
-            const volumeIcon = document.querySelector('.volume-icon');
-            if (this.value === '0') {
-                volumeIcon.textContent = '🔇';
-            } else if (this.value < 0.5) {
-                volumeIcon.textContent = '🔉';
-            } else {
-                volumeIcon.textContent = '🔊';
-            }
-        });
-        
-        // Make volume icon clickable to mute/unmute
-        document.querySelector('.volume-icon').addEventListener('click', function() {
-            if (soundFile.volume > 0) {
-                // Store the current slider value before muting
-                this.dataset.previousVolume = volumeSlider.value;
-                soundFile.volume = 0;
-                volumeSlider.value = 0;
-                this.textContent = '🔇';
-            } else {
-                // Restore the previous volume or set to default if not stored
-                const previousVolume = this.dataset.previousVolume || 0.5;
-                volumeSlider.value = previousVolume;
-                soundFile.volume = previousVolume * 0.5; // Scale by 0.5
-                this.textContent = previousVolume < 0.5 ? '🔉' : '🔊';
-            }
-        });
-    } else {
-        // For mobile devices, set a fixed volume (50% of maximum)
-        soundFile.volume = 0.25;
+            // For mobile devices, set a fixed volume (50% of maximum)
+            soundFile.volume = 0.25;
+        } else {
+            // Only set up volume controls for desktop devices
+            // Set default volume (scaled down to 25% of original maximum)
+            soundFile.volume = volumeSlider.value * 0.5; // Scale slider value by 0.5
+            
+            // Volume change handler - scale down volume to 50% maximum
+            volumeSlider.addEventListener('input', function() {
+                // Scale the slider value (0-1) to a maximum of 0.5 for the actual audio
+                soundFile.volume = this.value * 0.5;
+                
+                // Update volume icon based on relative volume level
+                const volumeIcon = document.querySelector('.volume-icon');
+                if (this.value === '0') {
+                    volumeIcon.textContent = '🔇';
+                } else if (this.value < 0.5) {
+                    volumeIcon.textContent = '🔉';
+                } else {
+                    volumeIcon.textContent = '🔊';
+                }
+            });
+            
+            // Make volume icon clickable to mute/unmute
+            document.querySelector('.volume-icon').addEventListener('click', function() {
+                if (soundFile.volume > 0) {
+                    // Store the current slider value before muting
+                    this.dataset.previousVolume = volumeSlider.value;
+                    soundFile.volume = 0;
+                    volumeSlider.value = 0;
+                    this.textContent = '🔇';
+                } else {
+                    // Restore the previous volume or set to default if not stored
+                    const previousVolume = this.dataset.previousVolume || 0.5;
+                    volumeSlider.value = previousVolume;
+                    soundFile.volume = previousVolume * 0.5; // Scale by 0.5
+                    this.textContent = previousVolume < 0.5 ? '🔉' : '🔊';
+                }
+            });
+        }
     }
     
     // Initialize and set up digital clock
