@@ -22,25 +22,39 @@
     <div class="ocean-container" id="ocean-container">
         <!-- Waves will be added here by JavaScript -->
     </div>
-    
+
     <!-- Digital Clock -->
     <div id="digital-clock"></div>
-    
+
     <main class="pomodoro-timer dark-mode">
-        <div class="toggle--daynight dark-mode-toggle">
-            <input type="checkbox" id="toggle--daynight" class="toggle--checkbox">
-            <label class="toggle--btn" for="toggle--daynight"><span class="toggle--feature"></span></label>
+        <div class="controls-container">
+            <div class="toggle--daynight dark-mode-toggle">
+                <input type="checkbox" id="toggle--daynight" class="toggle--checkbox">
+                <label class="toggle--btn" for="toggle--daynight"><span class="toggle--feature"></span></label>
+            </div>
+            <button id="config-button" class="config-button" aria-label="Settings">
+                <img src="icons/settings.svg" alt="Settings" class="settings-icon">
+            </button>
         </div>
-        <!-- <div class="dark-mode-toggle">
-            <input type="checkbox" id="dark-mode-toggle" checked style="display:none;">
-            <label for="dark-mode-toggle" class="toggle-label">
-                <span class="toggle-slider"></span>
-                <span class="toggle-moon">🌞</span>
-                <span class="toggle-sun">🌛</span>
-            </label>
-        </div> -->
         <h1>Linneas Workspace</h1>
+
+        <!-- Settings Panel -->
+        <div id="config-panel" class="config-panel">
+            <h3>Settings</h3>
+            <div class="config-option">
+                <label for="end-sound-volume">End Sound Volume</label>
+                <input type="range" id="end-sound-volume" min="0" max="1" step="0.01" value="0.5">
+            </div>
+        </div>
+
         <div id="timer" aria-live="polite">25:00</div>
+
+        <!-- Add timer mode selection buttons -->
+        <div class="timer-mode-selector">
+            <button id="work-mode" class="mode-button active" aria-label="Work Timer Mode">Work</button>
+            <button id="break-mode" class="mode-button" aria-label="Break Timer Mode">Break</button>
+        </div>
+
         <form>
             <div>
                 <label for="work-time">Work Time</label>
@@ -68,7 +82,8 @@
         <div class="volume-container">
             <div class="volume-icon">🔊</div>
             <div class="volume-slider-container">
-                <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.5" aria-label="Volume Control">
+                <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.5"
+                    aria-label="Volume Control">
             </div>
         </div>
         <audio id="end-sound" src="sounds/countdown/end-sound.mp3"></audio>

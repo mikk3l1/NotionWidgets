@@ -29,7 +29,7 @@ h1 {
 
 #timer {
     font-size: 48px;
-    margin: 20px 0;
+    /* margin: 20px 0; */
     transition: color 0.5s ease, background-color 0.5s ease;
 }
 
@@ -404,8 +404,6 @@ input:checked+.toggle-label .toggle-sun {
 
 /* Form and Input Styles */
 form {
-    /* margin: 20px 0; */
-    margin-top: 20px;
     margin-left: 0;
     margin-right: 0;
     margin-bottom: 5px;
@@ -474,6 +472,49 @@ input[type="number"] {
     label {
         margin-bottom: 0;
     }
+}
+
+/* Timer Mode Selector Styling */
+.timer-mode-selector {
+    margin-top: 5px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.mode-button {
+    padding: 5px 15px;
+    border-radius: 15px;
+    background-color: #f1f1f1;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    color: #333;
+    max-width: 80px;
+}
+
+.mode-button.active {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.mode-button#break-mode.active {
+    background-color: #f44336;
+}
+
+.dark-mode .mode-button {
+    background-color: #333;
+    color: #ddd;
+}
+
+.dark-mode .mode-button.active {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.dark-mode .mode-button#break-mode.active {
+    background-color: #f44336;
 }
 
 /* Common styles for all effect containers */
@@ -1088,4 +1129,166 @@ body:not(.dark-mode) #digital-clock {
         top: 10px;
         left: 10px;
     }
+}
+
+/* Settings Button and Panel Styles */
+.config-button {
+    position: absolute;
+    top: 5px;
+    right: 40px; /* Position to the right of the dark mode toggle */
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+    margin: 0;
+    z-index: 10;
+}
+
+.settings-icon {
+    width: 100%;
+    height: 100%;
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+}
+
+.settings-icon:hover {
+    opacity: 1;
+}
+
+.dark-mode .settings-icon {
+    filter: invert(1);
+}
+
+.config-panel {
+    position: absolute;
+    top: 40px;
+    right: 10px;
+    background-color: white;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    width: 250px;
+    max-width: 90%;
+    z-index: 100;
+    display: none;
+    transition: opacity 0.3s, transform 0.3s;
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+.config-panel.active {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.dark-mode .config-panel {
+    background-color: #333;
+    color: #fff;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
+}
+
+.config-panel h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 16px;
+    color: #333;
+}
+
+.dark-mode .config-panel h3 {
+    color: #fff;
+}
+
+.config-option {
+    margin-bottom: 10px;
+}
+
+.config-option label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+.config-option input[type="range"] {
+    width: 100%;
+    -webkit-appearance: none;
+    height: 5px;
+    border-radius: 5px;
+    background: #ddd;
+    outline: none;
+    opacity: 0.7;
+    transition: opacity .2s;
+}
+
+.config-option input[type="range"]:hover {
+    opacity: 1;
+}
+
+.config-option input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: #2196F3;
+    cursor: pointer;
+}
+
+.dark-mode .config-option input[type="range"] {
+    background: #555;
+}
+
+/* Controls container for buttons in top-right */
+.controls-container {
+    position: absolute;
+    top: -12px;
+    right: 12px;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 5px;
+}
+
+/* Remove conflicting absolute positioning */
+.dark-mode-toggle {
+    position: static; /* Changed from absolute - important! */
+    margin: 0;
+    padding: 0;
+    transform: scale(0.4);
+    transform-origin: right;
+    flex-shrink: 0;
+}
+
+/* Remove redundant absolute positioned styles */
+.toggle-corner, 
+.toggle-small .toggle--btn,
+.toggle-small {
+    margin: 0;
+    position: static;
+}
+
+/* Settings button styling */
+.config-button {
+    position: static; /* Changed from absolute - important! */
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.settings-icon {
+    width: 20px;
+    height: 20px;
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
 }

@@ -389,18 +389,70 @@ function updateTimer() {
     document.title = `${formattedTime} Linneas Workspace`;
 }
 
-// Add a function to update the timer state styling
-function updateTimerState() {
-    // Remove both classes first
+// Add mode selection button references
+const workModeButton = document.getElementById('work-mode');
+const breakModeButton = document.getElementById('break-mode');
+
+// Update the timer state function to handle mode changes
+function updateTimerState(forceUpdate = false) {
+    // Remove both classes first from timer display
     timerElement.classList.remove('timer-work', 'timer-break');
     
     // Add the appropriate class based on current state
     if (isBreak) {
         timerElement.classList.add('timer-break');
+        workModeButton.classList.remove('active');
+        breakModeButton.classList.add('active');
     } else {
         timerElement.classList.add('timer-work');
+        workModeButton.classList.add('active');
+        breakModeButton.classList.remove('active');
+    }
+    
+    // If this is a forced update (from button click), also update the timer value
+    if (forceUpdate) {
+        // Reset timer to the appropriate value for the selected mode
+        if (isBreak) {
+            timeLeft = breakTime;
+        } else {
+            timeLeft = workTime;
+        }
+        updateTimer();
     }
 }
+
+// Add click handlers for mode buttons - these will manually change the timer mode
+workModeButton.addEventListener('click', function() {
+    if (isBreak) { // Only do something if we're changing modes
+        isBreak = false;
+        
+        // Cancel current running timer if any
+        if (isRunning) {
+            clearInterval(timer);
+            isRunning = false;
+            document.getElementById('play-pause-icon').src = "icons/play.svg";
+            startButton.setAttribute('aria-label', 'Start Timer');
+        }
+        
+        updateTimerState(true); // Update UI and reset time
+    }
+});
+
+breakModeButton.addEventListener('click', function() {
+    if (!isBreak) { // Only do something if we're changing modes
+        isBreak = true;
+        
+        // Cancel current running timer if any
+        if (isRunning) {
+            clearInterval(timer);
+            isRunning = false;
+            document.getElementById('play-pause-icon').src = "icons/play.svg";
+            startButton.setAttribute('aria-label', 'Start Timer');
+        }
+        
+        updateTimerState(true); // Update UI and reset time
+    }
+});
 
 function startTimer() {
     if (!isRunning) {
@@ -478,14 +530,19 @@ function startTimer() {
 function resetTimer() {
     clearInterval(timer);
     isRunning = false;
-    isBreak = false;
+    // We no longer automatically reset to work mode - keep the current mode
     // Ensure button shows play icon when reset
     document.getElementById('play-pause-icon').src = "icons/play.svg";
     startButton.setAttribute('aria-label', 'Start Timer');
     workTime = parseFloat(workTimeInput.value) * 60;
     breakTime = parseFloat(breakTimeInput.value) * 60;
-    timeLeft = workTime;
-    // Update timer state styling when reset (back to work state)
+    // Set timeLeft based on current mode
+    if (isBreak) {
+        timeLeft = breakTime;
+    } else {
+        timeLeft = workTime;
+    }
+    // Update timer state styling when reset
     updateTimerState();
     // Removed stopSound() so ambient sound continues playing when timer is reset
     updateTimer();
@@ -641,8 +698,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Check if device is mobile or tablet
     const isMobileOrTablet = getDeviceType();
-    
-    console.log('isMobileOrTablet:',isMobileOrTablet);
 
     // Volume control setup - completely hide on mobile devices
     const volumeSlider = document.getElementById('volume-slider');
@@ -698,6 +753,49 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize and set up digital clock
     updateDigitalClock();
     setInterval(updateDigitalClock, 1000);
+    
+    // Configuration button and panel setup
+    const configButton = document.getElementById('config-button');
+    const configPanel = document.getElementById('config-panel');
+    const endSoundVolume = document.getElementById('end-sound-volume');
+    
+    if (configButton && configPanel) {
+        // Toggle configuration panel visibility
+        configButton.addEventListener('click', function(e) {
+            e.stopPropagation(); // Prevent event bubbling
+            configPanel.classList.toggle('active');
+            console.log('Settings panel toggled');
+        });
+        
+        // Close panel when clicking outside
+        document.addEventListener('click', function(e) {
+            if (configPanel.classList.contains('active') && 
+                !configPanel.contains(e.target) && 
+                e.target !== configButton) {
+                configPanel.classList.remove('active');
+            }
+        });
+        
+        // Prevent clicks inside panel from closing it
+        configPanel.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    }
+    
+    // End sound volume control
+    if (endSoundVolume) {
+        // Load saved end sound volume preference
+        const savedEndSoundVolume = localStorage.getItem('endSoundVolume');
+        if (savedEndSoundVolume !== null) {
+            endSoundVolume.value = savedEndSoundVolume;
+            endSound.volume = savedEndSoundVolume;
+        }
+        
+        endSoundVolume.addEventListener('input', function() {
+            endSound.volume = this.value;
+            localStorage.setItem('endSoundVolume', this.value);
+        });
+    }
 });
 
 // Digital Clock Functionality
