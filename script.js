@@ -829,14 +829,71 @@ function initDrawingPanel() {
     const saveBtn = document.getElementById('save-canvas');
     const panel = document.querySelector('.drawing-panel');
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
     const dpr = window.devicePixelRatio || 1;
     let drawing = false;
     let erasing = false;
     let penColor = '#fff';
-    const penSize = 4;
+    const penSize = 2; // thinner strokes
     const eraseSize = 20;
     let points = [];
+    let lastSmoothed = null;
+    const smoothingFactor = 0.18; // lower = stronger smoothing (0..1)
+    // Undo/Redo stacks (store ImageData)
+    let undoStack = [];
+    let redoStack = [];
+    const maxHistory = 60;
+
+    const undoBtn = document.getElementById('undo-btn');
+    const redoBtn = document.getElementById('redo-btn');
+
+    function updateHistoryButtons() {
+        if (undoBtn) undoBtn.disabled = undoStack.length === 0;
+        if (redoBtn) redoBtn.disabled = redoStack.length === 0;
+    }
+
+    function pushState() {
+        try {
+            if (undoStack.length >= maxHistory) undoStack.shift();
+            const snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            undoStack.push(snapshot);
+            // clear redo on new action
+            redoStack = [];
+            updateHistoryButtons();
+        } catch (e) { /* ignore if getImageData fails */ }
+    }
+
+    function restoreState(imgData) {
+        if (!imgData) return;
+        try {
+            ctx.putImageData(imgData, 0, 0);
+        } catch (e) { /* ignore */ }
+    }
+
+    if (undoBtn) {
+        undoBtn.addEventListener('click', () => {
+            if (undoStack.length === 0) return;
+            try {
+                const current = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                redoStack.push(current);
+                const prev = undoStack.pop();
+                restoreState(prev);
+                updateHistoryButtons();
+            } catch (e) { }
+        });
+    }
+    if (redoBtn) {
+        redoBtn.addEventListener('click', () => {
+            if (redoStack.length === 0) return;
+            try {
+                const current = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                undoStack.push(current);
+                const next = redoStack.pop();
+                restoreState(next);
+                updateHistoryButtons();
+            } catch (e) { }
+        });
+    }
 
     function setCanvasSize() {
         if (!panel) return;
@@ -891,52 +948,76 @@ function initDrawingPanel() {
     function start(e) {
         e.preventDefault();
         drawing = true;
+        // save current state so this whole stroke becomes one undo step
+        pushState();
         points = [];
         const pos = getPos(e);
-        // push starting point twice to initialize smoothing
-        points.push(pos, pos);
+        // initialize smoothing state
+        lastSmoothed = { x: pos.x, y: pos.y };
+        points.push(lastSmoothed);
+        updateHistoryButtons();
     }
 
     function move(e) {
         if (!drawing) return;
         e.preventDefault();
         const p = getPos(e);
-        points.push(p);
+        // apply a light low-pass filter to reduce jitter
+        const candidate = !lastSmoothed ? p : {
+            x: lastSmoothed.x * (1 - smoothingFactor) + p.x * smoothingFactor,
+            y: lastSmoothed.y * (1 - smoothingFactor) + p.y * smoothingFactor
+        };
+
+        // ignore very small movements to avoid long straight lines when holding mouse
+        const dx = candidate.x - lastSmoothed.x;
+        const dy = candidate.y - lastSmoothed.y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        const moveThreshold = 0.8; // pixels
+        if (dist < moveThreshold) return;
+
+        lastSmoothed = candidate;
+        points.push(lastSmoothed);
 
         ctx.globalCompositeOperation = erasing ? 'destination-out' : 'source-over';
         ctx.strokeStyle = penColor;
         ctx.lineWidth = erasing ? eraseSize : penSize;
 
-        // If we have fewer than 3 points, draw a simple line
-        if (points.length < 3) {
+        // If we have fewer than 4 points, draw a simple line
+        if (points.length < 4) {
             const b = points[0];
             ctx.beginPath();
             ctx.moveTo(b.x, b.y);
-            ctx.lineTo(p.x, p.y);
+            ctx.lineTo(lastSmoothed.x, lastSmoothed.y);
             ctx.stroke();
             ctx.closePath();
             return;
         }
 
-        // Use quadratic curves between midpoints for smoothing
+        // Use Catmull-Rom to Bezier conversion for smooth curves
         const len = points.length;
-        const p0 = points[len - 3];
-        const p1 = points[len - 2];
-        const p2 = points[len - 1];
+        const p0 = points[len - 4];
+        const p1 = points[len - 3];
+        const p2 = points[len - 2];
+        const p3 = points[len - 1];
 
-        const mid1 = { x: (p0.x + p1.x) / 2, y: (p0.y + p1.y) / 2 };
-        const mid2 = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
+        // control points
+        const cp1 = {
+            x: p1.x + (p2.x - p0.x) / 6,
+            y: p1.y + (p2.y - p0.y) / 6
+        };
+        const cp2 = {
+            x: p2.x - (p3.x - p1.x) / 6,
+            y: p2.y - (p3.y - p1.y) / 6
+        };
 
         ctx.beginPath();
-        ctx.moveTo(mid1.x, mid1.y);
-        ctx.quadraticCurveTo(p1.x, p1.y, mid2.x, mid2.y);
+        ctx.moveTo(p1.x, p1.y);
+        ctx.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, p2.x, p2.y);
         ctx.stroke();
         ctx.closePath();
 
-        // Keep last two points so we can continue smoothing seamlessly
-        if (points.length > 1000) {
-            points = points.slice(-50);
-        }
+        // keep buffer small
+        if (points.length > 200) points = points.slice(-60);
     }
 
     function end() {
@@ -944,6 +1025,7 @@ function initDrawingPanel() {
         drawing = false;
         points = [];
         ctx.closePath();
+        lastSmoothed = null;
     }
 
     canvas.addEventListener('mousedown', start);
@@ -967,8 +1049,11 @@ function initDrawingPanel() {
 
     if (confirmYes) {
         confirmYes.addEventListener('click', () => {
+            // push current state before clearing so undo can restore
+            pushState();
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             if (confirmModal) confirmModal.classList.add('hidden');
+            updateHistoryButtons();
         });
     }
     if (confirmNo) {
@@ -1048,6 +1133,9 @@ function initDrawingPanel() {
         }
 
         ctx.putImageData(img, 0, 0);
+        // After recolor, push state so history reflects the recolored canvas
+        pushState();
+        updateHistoryButtons();
     }
 
     // Hook cursor update to tool buttons

@@ -90,6 +90,10 @@
     </main>
     <!-- Tegnepanel: Blackboard (tegning med mus, slet og gem) -->
     <section class="drawing-panel" aria-label="Tegnepanel">
+        <div class="undo-redo">
+            <button id="undo-btn" class="tool-button undo-button" aria-label="Fortryd">↶</button>
+            <button id="redo-btn" class="tool-button redo-button" aria-label="Annuller Fortryd">↷</button>
+        </div>
         <h3 class="drawing-title">Blackboard</h3>
         <canvas id="drawing-canvas" aria-label="Tegneflade"></canvas>
         <div class="drawing-toolbar">
