@@ -1,12 +1,16 @@
 body {
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: center; /* center panels vertically and horizontally */
     height: 100vh;
     background-color: #f4f4f4;
     font-family: Arial, sans-serif;
     margin: 0;
     transition: background-color 0.3s;
+}
+/* Add gap between main elements so they don't overlap */
+body {
+    gap: 20px;
 }
 
 .pomodoro-timer {
@@ -396,6 +400,141 @@ input:checked+.toggle-label .toggle-sun {
     border-radius: 50%;
     background: #2196F3;
     cursor: pointer;
+}
+
+/* Tegnepanel styling */
+/* Make drawing panel visually match the pomodoro element */
+.drawing-panel {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 400px; /* match element beside */
+    height: 424px; /* match element beside */
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+    box-sizing: border-box;
+}
+
+.drawing-toolbar {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    margin-bottom: 0;
+    position: relative;
+    z-index: 2;
+    justify-content: center;
+}
+
+.tool-button {
+    /* Emoji-only button appearance */
+    padding: 8px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    background: #333;
+    color: #fff;
+    min-width: 48px;
+    min-height: 48px;
+    width: 56px;
+    height: 56px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+}
+
+.tool-button:focus {
+    outline: 2px solid rgba(0,0,0,0.2);
+}
+
+.tool-button.active {
+    background: #4CAF50;
+    color: white;
+}
+
+#drawing-canvas {
+    border: 1px solid rgba(0,0,0,0.08);
+    background: #ffffff;
+    touch-action: none; /* prevent scrolling while drawing on touch */
+    display: block;
+    width: 100%;
+    height: auto;
+    position: relative;
+    z-index: 1;
+}
+
+.dark-mode .tool-button {
+    background: #2a2a2a;
+    color: #fff;
+    border-color: #444;
+}
+
+/* Confirmation modal styles */
+.confirm-modal.hidden { display: none; }
+.confirm-modal {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.45);
+    z-index: 9999;
+}
+.confirm-dialog {
+    background: var(--panel-bg, #fff);
+    color: inherit;
+    padding: 18px;
+    border-radius: 10px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+    max-width: 360px;
+    text-align: center;
+}
+.confirm-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 12px;
+}
+
+.dark-mode .confirm-dialog {
+    background: #1e1e1e;
+    color: #fff;
+}
+
+.dark-mode #drawing-canvas {
+    background: #1e1e1e;
+    border-color: #333;
+}
+
+.drawing-panel.dark-mode {
+    background-color: #1e1e1e;
+    color: #ffffff;
+}
+
+/* When the page is in dark mode, match the pomodoro panel background */
+.dark-mode .drawing-panel {
+    background-color: #1e1e1e;
+    color: #ffffff;
+}
+
+.drawing-title {
+    width: 100%;
+    text-align: center;
+    margin: 0 0 8px 0;
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+/* Make canvas take the remaining space inside the panel (title + toolbar included) */
+#drawing-canvas {
+    width: 100%;
+    height: 300px; /* will be adjusted by JS on init to exact available space */
+    display: block;
 }
 
 .dark-mode #volume-slider {

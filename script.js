@@ -16,7 +16,7 @@ const rainSoundButton = document.getElementById('rain-sound');
 const jungleSoundButton = document.getElementById('jungle-sound');
 const oceanSoundButton = document.getElementById('ocean-sound');
 const soundButtons = document.querySelectorAll('.sound-button');
-const darkModeToggle = document.getElementById('dark-mode-toggle');
+const darkModeToggle = document.getElementById('toggle--daynight');
 const soundFile = document.getElementById('sound-file');
 const rainContainer = document.getElementById('rain-container');
 const jungleContainer = document.getElementById('jungle-container');
@@ -649,10 +649,9 @@ function stopSound() {
     soundFile.currentTime = 0;
 }
 
-// Update dark mode toggle functionality
-document.getElementById('toggle--daynight').addEventListener('change', function() {
-    toggleDarkMode();
-});
+// Dark mode toggle listener - guard in case element missing
+// (some environments may not have the toggle input available at parse time)
+// Listener added later with a null-check below.
 
 function toggleDarkMode() {
     document.body.classList.toggle('dark-mode');
@@ -813,6 +812,244 @@ oceanSoundButton.addEventListener('click', () => changeSound('ocean', oceanSound
 
 startButton.addEventListener('click', startTimer);
 resetButton.addEventListener('click', resetTimer);
-darkModeToggle.addEventListener('change', toggleDarkMode);
+if (darkModeToggle) {
+    darkModeToggle.addEventListener('change', toggleDarkMode);
+}
 
 updateTimer();
+
+/* -------- Tegnepanel: tegn, slet og gem ---------- */
+function initDrawingPanel() {
+    const canvas = document.getElementById('drawing-canvas');
+    if (!canvas) return;
+
+    const drawBtn = document.getElementById('draw-mode');
+    const eraseBtn = document.getElementById('erase-mode');
+    const clearBtn = document.getElementById('clear-canvas');
+    const saveBtn = document.getElementById('save-canvas');
+    const panel = document.querySelector('.drawing-panel');
+
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    let drawing = false;
+    let erasing = false;
+    let penColor = '#fff';
+    const penSize = 4;
+    const eraseSize = 20;
+    let points = [];
+
+    function setCanvasSize() {
+        if (!panel) return;
+        const panelStyle = getComputedStyle(panel);
+        const padTop = parseFloat(panelStyle.paddingTop) || 0;
+        const padBottom = parseFloat(panelStyle.paddingBottom) || 0;
+        const padLeft = parseFloat(panelStyle.paddingLeft) || 0;
+        const padRight = parseFloat(panelStyle.paddingRight) || 0;
+
+        const title = panel.querySelector('.drawing-title');
+        const toolbar = panel.querySelector('.drawing-toolbar');
+
+        const innerWidth = panel.clientWidth - padLeft - padRight;
+        let innerHeight = panel.clientHeight - padTop - padBottom;
+        if (title) innerHeight -= title.offsetHeight;
+        if (toolbar) innerHeight -= toolbar.offsetHeight;
+
+        const cssWidth = Math.max(80, Math.floor(innerWidth));
+        const cssHeight = Math.max(80, Math.floor(innerHeight));
+
+        // Preserve current drawing
+        const tmp = document.createElement('canvas');
+        tmp.width = canvas.width || Math.floor(cssWidth * dpr);
+        tmp.height = canvas.height || Math.floor(cssHeight * dpr);
+        const tctx = tmp.getContext('2d');
+        if (canvas.width && canvas.height) {
+            try { tctx.drawImage(canvas, 0, 0, tmp.width, tmp.height); } catch (e) { }
+        }
+
+        canvas.width = Math.floor(cssWidth * dpr);
+        canvas.height = Math.floor(cssHeight * dpr);
+        canvas.style.width = cssWidth + 'px';
+        canvas.style.height = cssHeight + 'px';
+
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        if (tmp.width && tmp.height) {
+            ctx.clearRect(0, 0, cssWidth, cssHeight);
+            try { ctx.drawImage(tmp, 0, 0, tmp.width / dpr, tmp.height / dpr, 0, 0, cssWidth, cssHeight); } catch (e) { }
+        }
+    }
+
+    function getPos(e) {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return { x: clientX - rect.left, y: clientY - rect.top };
+    }
+
+    function start(e) {
+        e.preventDefault();
+        drawing = true;
+        points = [];
+        const pos = getPos(e);
+        // push starting point twice to initialize smoothing
+        points.push(pos, pos);
+    }
+
+    function move(e) {
+        if (!drawing) return;
+        e.preventDefault();
+        const p = getPos(e);
+        points.push(p);
+
+        ctx.globalCompositeOperation = erasing ? 'destination-out' : 'source-over';
+        ctx.strokeStyle = penColor;
+        ctx.lineWidth = erasing ? eraseSize : penSize;
+
+        // If we have fewer than 3 points, draw a simple line
+        if (points.length < 3) {
+            const b = points[0];
+            ctx.beginPath();
+            ctx.moveTo(b.x, b.y);
+            ctx.lineTo(p.x, p.y);
+            ctx.stroke();
+            ctx.closePath();
+            return;
+        }
+
+        // Use quadratic curves between midpoints for smoothing
+        const len = points.length;
+        const p0 = points[len - 3];
+        const p1 = points[len - 2];
+        const p2 = points[len - 1];
+
+        const mid1 = { x: (p0.x + p1.x) / 2, y: (p0.y + p1.y) / 2 };
+        const mid2 = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
+
+        ctx.beginPath();
+        ctx.moveTo(mid1.x, mid1.y);
+        ctx.quadraticCurveTo(p1.x, p1.y, mid2.x, mid2.y);
+        ctx.stroke();
+        ctx.closePath();
+
+        // Keep last two points so we can continue smoothing seamlessly
+        if (points.length > 1000) {
+            points = points.slice(-50);
+        }
+    }
+
+    function end() {
+        if (!drawing) return;
+        drawing = false;
+        points = [];
+        ctx.closePath();
+    }
+
+    canvas.addEventListener('mousedown', start);
+    canvas.addEventListener('touchstart', start, { passive: false });
+    canvas.addEventListener('mousemove', move);
+    canvas.addEventListener('touchmove', move, { passive: false });
+    window.addEventListener('mouseup', end);
+    window.addEventListener('touchend', end);
+
+    drawBtn.addEventListener('click', () => { erasing = false; drawBtn.classList.add('active'); eraseBtn.classList.remove('active'); });
+    eraseBtn.addEventListener('click', () => { erasing = true; eraseBtn.classList.add('active'); drawBtn.classList.remove('active'); });
+
+    // Confirmation modal elements
+    const confirmModal = document.getElementById('confirm-modal');
+    const confirmYes = document.getElementById('confirm-yes');
+    const confirmNo = document.getElementById('confirm-no');
+
+    clearBtn.addEventListener('click', () => {
+        if (confirmModal) confirmModal.classList.remove('hidden');
+    });
+
+    if (confirmYes) {
+        confirmYes.addEventListener('click', () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (confirmModal) confirmModal.classList.add('hidden');
+        });
+    }
+    if (confirmNo) {
+        confirmNo.addEventListener('click', () => {
+            if (confirmModal) confirmModal.classList.add('hidden');
+        });
+    }
+
+    // Emoji cursor helper: create an SVG data URL with the emoji and return CSS cursor value
+    function makeEmojiCursor(emoji, size = 48) {
+        const svg = `<?xml version="1.0" encoding="utf-8"?><svg xmlns='http://www.w3.org/2000/svg' width='${size}' height='${size}' viewBox='0 0 ${size} ${size}'>` +
+            `<style>text{font-family: 'Segoe UI Emoji','Apple Color Emoji','Noto Color Emoji',sans-serif; font-size:${Math.floor(size * 0.8)}px;}</style>` +
+            `<text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle'>${emoji}</text></svg>`;
+        const url = 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+        // hotspot roughly center
+        return `url("${url}") ${Math.floor(size/2)} ${Math.floor(size/2)}, auto`;
+    }
+
+    // Apply cursor depending on current tool selection
+    function updateCursor() {
+        if (!panel) return;
+        if (erasing) {
+            panel.style.cursor = makeEmojiCursor('🧽', 48);
+            canvas.style.cursor = makeEmojiCursor('🧽', 48);
+        } else {
+            panel.style.cursor = makeEmojiCursor('🖌️', 48);
+            canvas.style.cursor = makeEmojiCursor('🖌️', 48);
+        }
+    }
+
+    // Update pen color according to current (body) dark-mode state
+    function updatePenColor() {
+        const isDark = document.body.classList.contains('dark-mode');
+        penColor = isDark ? '#fff' : '#000';
+    }
+
+    // Hook cursor update to tool buttons
+    drawBtn.addEventListener('click', () => { erasing = false; drawBtn.classList.add('active'); eraseBtn.classList.remove('active'); updateCursor(); });
+    eraseBtn.addEventListener('click', () => { erasing = true; eraseBtn.classList.add('active'); drawBtn.classList.remove('active'); updateCursor(); });
+
+    // Set initial pen color and cursor based on current mode/tool
+    updatePenColor();
+    updateCursor();
+
+    // Update pen color and cursor when global dark-mode toggle changes
+    if (typeof darkModeToggle !== 'undefined' && darkModeToggle) {
+        darkModeToggle.addEventListener('change', () => {
+            // toggleDarkMode already toggles classes; just update pen and cursor
+            updatePenColor();
+            updateCursor();
+        });
+    }
+    saveBtn.addEventListener('click', () => {
+        const exportCanvas = document.createElement('canvas');
+        const cssW = parseInt(canvas.style.width, 10) || canvas.width;
+        const cssH = parseInt(canvas.style.height, 10) || canvas.height;
+        exportCanvas.width = cssW;
+        exportCanvas.height = cssH;
+        const ectx = exportCanvas.getContext('2d');
+        ectx.fillStyle = window.getComputedStyle(canvas).backgroundColor || '#fff';
+        ectx.fillRect(0, 0, cssW, cssH);
+        ectx.drawImage(canvas, 0, 0, cssW, cssH);
+        const link = document.createElement('a');
+        link.download = 'blackboard.png';
+        link.href = exportCanvas.toDataURL('image/png');
+        link.click();
+    });
+
+    // match panel size to pomodoro timer on init and resize
+    const pomodoroEl = document.querySelector('.pomodoro-timer');
+    function matchPanel() {
+        if (pomodoroEl && panel) {
+            const r = pomodoroEl.getBoundingClientRect();
+            panel.style.width = r.width + 'px';
+            panel.style.height = r.height + 'px';
+        }
+        setCanvasSize();
+    }
+    let resizeTimeout;
+    window.addEventListener('resize', () => { clearTimeout(resizeTimeout); resizeTimeout = setTimeout(matchPanel, 150); });
+    matchPanel();
+}
+
+document.addEventListener('DOMContentLoaded', initDrawingPanel);
