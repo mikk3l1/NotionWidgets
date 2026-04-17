@@ -1002,7 +1002,67 @@ function initDrawingPanel() {
     // Update pen color according to current (body) dark-mode state
     function updatePenColor() {
         const isDark = document.body.classList.contains('dark-mode');
+        const prevPen = penColor;
         penColor = isDark ? '#fff' : '#000';
+        // If pen color changed, recolor existing drawing to match
+        if ((isDark && prevPen !== '#fff') || (!isDark && prevPen !== '#000')) {
+            recolorCanvas(isDark);
+        }
+    }
+
+    // Parse an rgb(...) or rgba(...) string to [r,g,b]
+    function parseRgb(str) {
+        if (!str) return [255,255,255];
+        const m = str.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
+        if (m) return [parseInt(m[1],10), parseInt(m[2],10), parseInt(m[3],10)];
+        return [255,255,255];
+    }
+
+    // Recolor existing canvas strokes so they match the new pen color/background.
+    // This works by sampling the canvas, detecting pixels that differ from the
+    // previous background and blending them toward the target pen color.
+    function recolorCanvas(toDarkMode) {
+        const w = canvas.width;
+        const h = canvas.height;
+        if (!w || !h) return;
+
+        // sample top-left pixel as previous background color
+        const sample = ctx.getImageData(0, 0, 1, 1).data;
+        const bgOld = [sample[0], sample[1], sample[2]];
+
+        // new panel background color (after toggle)
+        const panelBg = window.getComputedStyle(panel).backgroundColor;
+        const bgNew = parseRgb(panelBg);
+
+        const targetPen = toDarkMode ? [255,255,255] : [0,0,0];
+
+        const img = ctx.getImageData(0, 0, w, h);
+        const data = img.data;
+
+        for (let i = 0; i < data.length; i += 4) {
+            const r = data[i], g = data[i+1], b = data[i+2];
+
+            const dr = r - bgOld[0];
+            const dg = g - bgOld[1];
+            const db = b - bgOld[2];
+            const dist = Math.sqrt(dr*dr + dg*dg + db*db);
+
+            if (dist < 10) {
+                // background pixel -> set to new background
+                data[i] = bgNew[0];
+                data[i+1] = bgNew[1];
+                data[i+2] = bgNew[2];
+            } else {
+                // stroke pixel - compute mask from distance
+                const mask = Math.min(1, dist / 200);
+                data[i] = Math.round(bgNew[0] + (targetPen[0] - bgNew[0]) * mask);
+                data[i+1] = Math.round(bgNew[1] + (targetPen[1] - bgNew[1]) * mask);
+                data[i+2] = Math.round(bgNew[2] + (targetPen[2] - bgNew[2]) * mask);
+            }
+            // preserve alpha channel
+        }
+
+        ctx.putImageData(img, 0, 0);
     }
 
     // Hook cursor update to tool buttons

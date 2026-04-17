@@ -473,6 +473,20 @@ input:checked+.toggle-label .toggle-sun {
     border-color: #444;
 }
 
+/* Light mode: make toolbar buttons light to match workspace elements */
+body:not(.dark-mode) .drawing-panel .tool-button {
+    background: #f1f1f1;
+    color: #222;
+    border: 1px solid rgba(0,0,0,0.06);
+    box-shadow: none;
+}
+
+/* Keep active state color unchanged (green) so selection remains visible */
+body:not(.dark-mode) .drawing-panel .tool-button.active {
+    background: #4CAF50;
+    color: #fff;
+}
+
 /* Confirmation modal styles */
 .confirm-modal.hidden { display: none; }
 .confirm-modal {
