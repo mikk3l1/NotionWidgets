@@ -1020,46 +1020,31 @@ function initDrawingPanel() {
 
     // Recolor existing canvas strokes so they match the new pen color/background.
     // This works by sampling the canvas, detecting pixels that differ from the
-    // previous background and blending them toward the target pen color.
+    // Recolor existing canvas strokes so they match the new pen color.
+    // Use the alpha channel to detect ink pixels and set them directly
+    // to black or white to avoid blending artifacts.
     function recolorCanvas(toDarkMode) {
         const w = canvas.width;
         const h = canvas.height;
         if (!w || !h) return;
 
-        // sample top-left pixel as previous background color
-        const sample = ctx.getImageData(0, 0, 1, 1).data;
-        const bgOld = [sample[0], sample[1], sample[2]];
-
-        // new panel background color (after toggle)
-        const panelBg = window.getComputedStyle(panel).backgroundColor;
-        const bgNew = parseRgb(panelBg);
-
         const targetPen = toDarkMode ? [255,255,255] : [0,0,0];
-
         const img = ctx.getImageData(0, 0, w, h);
         const data = img.data;
 
+        // threshold for considering a pixel as 'ink'
+        const alphaThreshold = 16;
+
         for (let i = 0; i < data.length; i += 4) {
-            const r = data[i], g = data[i+1], b = data[i+2];
-
-            const dr = r - bgOld[0];
-            const dg = g - bgOld[1];
-            const db = b - bgOld[2];
-            const dist = Math.sqrt(dr*dr + dg*dg + db*db);
-
-            if (dist < 10) {
-                // background pixel -> set to new background
-                data[i] = bgNew[0];
-                data[i+1] = bgNew[1];
-                data[i+2] = bgNew[2];
-            } else {
-                // stroke pixel - compute mask from distance
-                const mask = Math.min(1, dist / 200);
-                data[i] = Math.round(bgNew[0] + (targetPen[0] - bgNew[0]) * mask);
-                data[i+1] = Math.round(bgNew[1] + (targetPen[1] - bgNew[1]) * mask);
-                data[i+2] = Math.round(bgNew[2] + (targetPen[2] - bgNew[2]) * mask);
+            const alpha = data[i+3];
+            if (alpha > alphaThreshold) {
+                // treat as stroke pixel: set to targetPen, preserve alpha
+                data[i] = targetPen[0];
+                data[i+1] = targetPen[1];
+                data[i+2] = targetPen[2];
+                // keep data[i+3] unchanged
             }
-            // preserve alpha channel
+            // leave background/transparent pixels untouched so panel bg shows through
         }
 
         ctx.putImageData(img, 0, 0);
