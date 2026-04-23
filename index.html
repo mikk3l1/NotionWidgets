@@ -88,6 +88,31 @@
         </div>
         <audio id="end-sound" src="sounds/countdown/end-sound.mp3"></audio>
     </main>
+    <!-- Tegnepanel: Blackboard (tegning med mus, slet og gem) -->
+    <section class="drawing-panel" aria-label="Tegnepanel">
+        <div class="undo-redo">
+            <button id="undo-btn" class="tool-button undo-button" aria-label="Fortryd">↶</button>
+            <button id="redo-btn" class="tool-button redo-button" aria-label="Annuller Fortryd">↷</button>
+        </div>
+        <h3 class="drawing-title">Blackboard</h3>
+        <canvas id="drawing-canvas" aria-label="Tegneflade"></canvas>
+        <div class="drawing-toolbar">
+            <button id="draw-mode" class="tool-button active" aria-label="Tegn">🖌️</button>
+            <button id="erase-mode" class="tool-button" aria-label="Slet">🧽</button>
+            <button id="clear-canvas" class="tool-button" aria-label="Ryd">💣</button>
+            <button id="save-canvas" class="tool-button" aria-label="Gem">💾</button>
+        </div>
+        <!-- Confirmation modal for clearing the canvas -->
+        <div id="confirm-modal" class="confirm-modal hidden" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+            <div class="confirm-dialog">
+                <p id="confirm-title">Er du sikker på, at du vil slette dit mesterværk?</p>
+                <div class="confirm-actions">
+                    <button id="confirm-yes" class="tool-button" aria-label="Ja">Ja</button>
+                    <button id="confirm-no" class="tool-button" aria-label="Nej">Nej</button>
+                </div>
+            </div>
+        </div>
+    </section>
     <script src="script.js"></script>
 </body>
 

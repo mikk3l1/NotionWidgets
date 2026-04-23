@@ -16,7 +16,7 @@ const rainSoundButton = document.getElementById('rain-sound');
 const jungleSoundButton = document.getElementById('jungle-sound');
 const oceanSoundButton = document.getElementById('ocean-sound');
 const soundButtons = document.querySelectorAll('.sound-button');
-const darkModeToggle = document.getElementById('dark-mode-toggle');
+const darkModeToggle = document.getElementById('toggle--daynight');
 const soundFile = document.getElementById('sound-file');
 const rainContainer = document.getElementById('rain-container');
 const jungleContainer = document.getElementById('jungle-container');
@@ -649,10 +649,9 @@ function stopSound() {
     soundFile.currentTime = 0;
 }
 
-// Update dark mode toggle functionality
-document.getElementById('toggle--daynight').addEventListener('change', function() {
-    toggleDarkMode();
-});
+// Dark mode toggle listener - guard in case element missing
+// (some environments may not have the toggle input available at parse time)
+// Listener added later with a null-check below.
 
 function toggleDarkMode() {
     document.body.classList.toggle('dark-mode');
@@ -813,6 +812,377 @@ oceanSoundButton.addEventListener('click', () => changeSound('ocean', oceanSound
 
 startButton.addEventListener('click', startTimer);
 resetButton.addEventListener('click', resetTimer);
-darkModeToggle.addEventListener('change', toggleDarkMode);
+if (darkModeToggle) {
+    darkModeToggle.addEventListener('change', toggleDarkMode);
+}
 
 updateTimer();
+
+/* -------- Tegnepanel: tegn, slet og gem ---------- */
+function initDrawingPanel() {
+    const canvas = document.getElementById('drawing-canvas');
+    if (!canvas) return;
+
+    const drawBtn = document.getElementById('draw-mode');
+    const eraseBtn = document.getElementById('erase-mode');
+    const clearBtn = document.getElementById('clear-canvas');
+    const saveBtn = document.getElementById('save-canvas');
+    const panel = document.querySelector('.drawing-panel');
+
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    const dpr = window.devicePixelRatio || 1;
+    let drawing = false;
+    let erasing = false;
+    let penColor = '#fff';
+    const penSize = 2; // thinner strokes
+    const eraseSize = 20;
+    let points = [];
+    let lastSmoothed = null;
+    const smoothingFactor = 0.18; // lower = stronger smoothing (0..1)
+    // Undo/Redo stacks (store ImageData)
+    let undoStack = [];
+    let redoStack = [];
+    const maxHistory = 60;
+
+    const undoBtn = document.getElementById('undo-btn');
+    const redoBtn = document.getElementById('redo-btn');
+
+    function updateHistoryButtons() {
+        if (undoBtn) undoBtn.disabled = undoStack.length === 0;
+        if (redoBtn) redoBtn.disabled = redoStack.length === 0;
+    }
+
+    function pushState() {
+        try {
+            if (undoStack.length >= maxHistory) undoStack.shift();
+            const snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            undoStack.push(snapshot);
+            // clear redo on new action
+            redoStack = [];
+            updateHistoryButtons();
+        } catch (e) { /* ignore if getImageData fails */ }
+    }
+
+    function restoreState(imgData) {
+        if (!imgData) return;
+        try {
+            ctx.putImageData(imgData, 0, 0);
+        } catch (e) { /* ignore */ }
+    }
+
+    if (undoBtn) {
+        undoBtn.addEventListener('click', () => {
+            if (undoStack.length === 0) return;
+            try {
+                const current = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                redoStack.push(current);
+                const prev = undoStack.pop();
+                restoreState(prev);
+                updateHistoryButtons();
+            } catch (e) { }
+        });
+    }
+    if (redoBtn) {
+        redoBtn.addEventListener('click', () => {
+            if (redoStack.length === 0) return;
+            try {
+                const current = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                undoStack.push(current);
+                const next = redoStack.pop();
+                restoreState(next);
+                updateHistoryButtons();
+            } catch (e) { }
+        });
+    }
+
+    function setCanvasSize() {
+        if (!panel) return;
+        const panelStyle = getComputedStyle(panel);
+        const padTop = parseFloat(panelStyle.paddingTop) || 0;
+        const padBottom = parseFloat(panelStyle.paddingBottom) || 0;
+        const padLeft = parseFloat(panelStyle.paddingLeft) || 0;
+        const padRight = parseFloat(panelStyle.paddingRight) || 0;
+
+        const title = panel.querySelector('.drawing-title');
+        const toolbar = panel.querySelector('.drawing-toolbar');
+
+        const innerWidth = panel.clientWidth - padLeft - padRight;
+        let innerHeight = panel.clientHeight - padTop - padBottom;
+        if (title) innerHeight -= title.offsetHeight;
+        if (toolbar) innerHeight -= toolbar.offsetHeight;
+
+        const cssWidth = Math.max(80, Math.floor(innerWidth));
+        const cssHeight = Math.max(80, Math.floor(innerHeight));
+
+        // Preserve current drawing
+        const tmp = document.createElement('canvas');
+        tmp.width = canvas.width || Math.floor(cssWidth * dpr);
+        tmp.height = canvas.height || Math.floor(cssHeight * dpr);
+        const tctx = tmp.getContext('2d');
+        if (canvas.width && canvas.height) {
+            try { tctx.drawImage(canvas, 0, 0, tmp.width, tmp.height); } catch (e) { }
+        }
+
+        canvas.width = Math.floor(cssWidth * dpr);
+        canvas.height = Math.floor(cssHeight * dpr);
+        canvas.style.width = cssWidth + 'px';
+        canvas.style.height = cssHeight + 'px';
+
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        if (tmp.width && tmp.height) {
+            ctx.clearRect(0, 0, cssWidth, cssHeight);
+            try { ctx.drawImage(tmp, 0, 0, tmp.width / dpr, tmp.height / dpr, 0, 0, cssWidth, cssHeight); } catch (e) { }
+        }
+    }
+
+    function getPos(e) {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return { x: clientX - rect.left, y: clientY - rect.top };
+    }
+
+    function start(e) {
+        e.preventDefault();
+        drawing = true;
+        // save current state so this whole stroke becomes one undo step
+        pushState();
+        points = [];
+        const pos = getPos(e);
+        // initialize smoothing state
+        lastSmoothed = { x: pos.x, y: pos.y };
+        points.push(lastSmoothed);
+        updateHistoryButtons();
+    }
+
+    function move(e) {
+        if (!drawing) return;
+        e.preventDefault();
+        const p = getPos(e);
+        // apply a light low-pass filter to reduce jitter
+        const candidate = !lastSmoothed ? p : {
+            x: lastSmoothed.x * (1 - smoothingFactor) + p.x * smoothingFactor,
+            y: lastSmoothed.y * (1 - smoothingFactor) + p.y * smoothingFactor
+        };
+
+        // ignore very small movements to avoid long straight lines when holding mouse
+        const dx = candidate.x - lastSmoothed.x;
+        const dy = candidate.y - lastSmoothed.y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        const moveThreshold = 0.8; // pixels
+        if (dist < moveThreshold) return;
+
+        lastSmoothed = candidate;
+        points.push(lastSmoothed);
+
+        ctx.globalCompositeOperation = erasing ? 'destination-out' : 'source-over';
+        ctx.strokeStyle = penColor;
+        ctx.lineWidth = erasing ? eraseSize : penSize;
+
+        // If we have fewer than 4 points, draw a simple line
+        if (points.length < 4) {
+            const b = points[0];
+            ctx.beginPath();
+            ctx.moveTo(b.x, b.y);
+            ctx.lineTo(lastSmoothed.x, lastSmoothed.y);
+            ctx.stroke();
+            ctx.closePath();
+            return;
+        }
+
+        // Use Catmull-Rom to Bezier conversion for smooth curves
+        const len = points.length;
+        const p0 = points[len - 4];
+        const p1 = points[len - 3];
+        const p2 = points[len - 2];
+        const p3 = points[len - 1];
+
+        // control points
+        const cp1 = {
+            x: p1.x + (p2.x - p0.x) / 6,
+            y: p1.y + (p2.y - p0.y) / 6
+        };
+        const cp2 = {
+            x: p2.x - (p3.x - p1.x) / 6,
+            y: p2.y - (p3.y - p1.y) / 6
+        };
+
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, p2.x, p2.y);
+        ctx.stroke();
+        ctx.closePath();
+
+        // keep buffer small
+        if (points.length > 200) points = points.slice(-60);
+    }
+
+    function end() {
+        if (!drawing) return;
+        drawing = false;
+        points = [];
+        ctx.closePath();
+        lastSmoothed = null;
+    }
+
+    canvas.addEventListener('mousedown', start);
+    canvas.addEventListener('touchstart', start, { passive: false });
+    canvas.addEventListener('mousemove', move);
+    canvas.addEventListener('touchmove', move, { passive: false });
+    window.addEventListener('mouseup', end);
+    window.addEventListener('touchend', end);
+
+    drawBtn.addEventListener('click', () => { erasing = false; drawBtn.classList.add('active'); eraseBtn.classList.remove('active'); });
+    eraseBtn.addEventListener('click', () => { erasing = true; eraseBtn.classList.add('active'); drawBtn.classList.remove('active'); });
+
+    // Confirmation modal elements
+    const confirmModal = document.getElementById('confirm-modal');
+    const confirmYes = document.getElementById('confirm-yes');
+    const confirmNo = document.getElementById('confirm-no');
+
+    clearBtn.addEventListener('click', () => {
+        if (confirmModal) confirmModal.classList.remove('hidden');
+    });
+
+    if (confirmYes) {
+        confirmYes.addEventListener('click', () => {
+            // push current state before clearing so undo can restore
+            pushState();
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (confirmModal) confirmModal.classList.add('hidden');
+            updateHistoryButtons();
+        });
+    }
+    if (confirmNo) {
+        confirmNo.addEventListener('click', () => {
+            if (confirmModal) confirmModal.classList.add('hidden');
+        });
+    }
+
+    // Emoji cursor helper: create an SVG data URL with the emoji and return CSS cursor value
+    function makeEmojiCursor(emoji, size = 48) {
+        const svg = `<?xml version="1.0" encoding="utf-8"?><svg xmlns='http://www.w3.org/2000/svg' width='${size}' height='${size}' viewBox='0 0 ${size} ${size}'>` +
+            `<style>text{font-family: 'Segoe UI Emoji','Apple Color Emoji','Noto Color Emoji',sans-serif; font-size:${Math.floor(size * 0.8)}px;}</style>` +
+            `<text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle'>${emoji}</text></svg>`;
+        const url = 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+        // hotspot roughly center
+        return `url("${url}") ${Math.floor(size/2)} ${Math.floor(size/2)}, auto`;
+    }
+
+    // Apply cursor depending on current tool selection
+    function updateCursor() {
+        if (!panel) return;
+        if (erasing) {
+            panel.style.cursor = makeEmojiCursor('🧽', 48);
+            canvas.style.cursor = makeEmojiCursor('🧽', 48);
+        } else {
+            panel.style.cursor = makeEmojiCursor('🖌️', 48);
+            canvas.style.cursor = makeEmojiCursor('🖌️', 48);
+        }
+    }
+
+    // Update pen color according to current (body) dark-mode state
+    function updatePenColor() {
+        const isDark = document.body.classList.contains('dark-mode');
+        const prevPen = penColor;
+        penColor = isDark ? '#fff' : '#000';
+        // If pen color changed, recolor existing drawing to match
+        if ((isDark && prevPen !== '#fff') || (!isDark && prevPen !== '#000')) {
+            recolorCanvas(isDark);
+        }
+    }
+
+    // Parse an rgb(...) or rgba(...) string to [r,g,b]
+    function parseRgb(str) {
+        if (!str) return [255,255,255];
+        const m = str.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
+        if (m) return [parseInt(m[1],10), parseInt(m[2],10), parseInt(m[3],10)];
+        return [255,255,255];
+    }
+
+    // Recolor existing canvas strokes so they match the new pen color/background.
+    // This works by sampling the canvas, detecting pixels that differ from the
+    // Recolor existing canvas strokes so they match the new pen color.
+    // Use the alpha channel to detect ink pixels and set them directly
+    // to black or white to avoid blending artifacts.
+    function recolorCanvas(toDarkMode) {
+        const w = canvas.width;
+        const h = canvas.height;
+        if (!w || !h) return;
+
+        const targetPen = toDarkMode ? [255,255,255] : [0,0,0];
+        const img = ctx.getImageData(0, 0, w, h);
+        const data = img.data;
+
+        // threshold for considering a pixel as 'ink'
+        const alphaThreshold = 16;
+
+        for (let i = 0; i < data.length; i += 4) {
+            const alpha = data[i+3];
+            if (alpha > alphaThreshold) {
+                // treat as stroke pixel: set to targetPen, preserve alpha
+                data[i] = targetPen[0];
+                data[i+1] = targetPen[1];
+                data[i+2] = targetPen[2];
+                // keep data[i+3] unchanged
+            }
+            // leave background/transparent pixels untouched so panel bg shows through
+        }
+
+        ctx.putImageData(img, 0, 0);
+        // After recolor, push state so history reflects the recolored canvas
+        pushState();
+        updateHistoryButtons();
+    }
+
+    // Hook cursor update to tool buttons
+    drawBtn.addEventListener('click', () => { erasing = false; drawBtn.classList.add('active'); eraseBtn.classList.remove('active'); updateCursor(); });
+    eraseBtn.addEventListener('click', () => { erasing = true; eraseBtn.classList.add('active'); drawBtn.classList.remove('active'); updateCursor(); });
+
+    // Set initial pen color and cursor based on current mode/tool
+    updatePenColor();
+    updateCursor();
+
+    // Update pen color and cursor when global dark-mode toggle changes
+    if (typeof darkModeToggle !== 'undefined' && darkModeToggle) {
+        darkModeToggle.addEventListener('change', () => {
+            // toggleDarkMode already toggles classes; just update pen and cursor
+            updatePenColor();
+            updateCursor();
+        });
+    }
+    saveBtn.addEventListener('click', () => {
+        const exportCanvas = document.createElement('canvas');
+        const cssW = parseInt(canvas.style.width, 10) || canvas.width;
+        const cssH = parseInt(canvas.style.height, 10) || canvas.height;
+        exportCanvas.width = cssW;
+        exportCanvas.height = cssH;
+        const ectx = exportCanvas.getContext('2d');
+        ectx.fillStyle = window.getComputedStyle(canvas).backgroundColor || '#fff';
+        ectx.fillRect(0, 0, cssW, cssH);
+        ectx.drawImage(canvas, 0, 0, cssW, cssH);
+        const link = document.createElement('a');
+        link.download = 'blackboard.png';
+        link.href = exportCanvas.toDataURL('image/png');
+        link.click();
+    });
+
+    // match panel size to pomodoro timer on init and resize
+    const pomodoroEl = document.querySelector('.pomodoro-timer');
+    function matchPanel() {
+        if (pomodoroEl && panel) {
+            const r = pomodoroEl.getBoundingClientRect();
+            panel.style.width = r.width + 'px';
+            panel.style.height = r.height + 'px';
+        }
+        setCanvasSize();
+    }
+    let resizeTimeout;
+    window.addEventListener('resize', () => { clearTimeout(resizeTimeout); resizeTimeout = setTimeout(matchPanel, 150); });
+    matchPanel();
+}
+
+document.addEventListener('DOMContentLoaded', initDrawingPanel);
